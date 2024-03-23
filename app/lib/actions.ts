@@ -1,7 +1,7 @@
 'use server';
 
 import { z } from 'zod';
-import { Client } from 'pg';
+import { PrismaClient } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
@@ -34,8 +34,8 @@ const CreateInvoice = FormSchema.omit({ id: true, date: true });
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 
 export async function createInvoice(prevState: State, formData: FormData) {
-  const client = new Client();
-  await client.connect();
+  const prisma = new PrismaClient();
+
   const validatedFields = CreateInvoice.safeParse({
     customerId: formData.get('customerId'),
     amount: formData.get('amount'),
@@ -49,20 +49,24 @@ export async function createInvoice(prevState: State, formData: FormData) {
   }
   const { customerId, amount, status } = validatedFields.data;
   const amountInCents = amount * 100;
-  const date = new Date().toISOString().split('T')[0];
-
-  const text =
-    'INSERT INTO invoices (customer_id, amount, status, date) VALUES ($1, $2, $3, $4)';
-  const values = [customerId, amountInCents, status, date];
+  const date = new Date().toISOString();
 
   try {
-    await client.query(text, values);
+    const createInvoice = await prisma.invoices.create({
+      data: {
+        customerId: customerId,
+        amount: amountInCents,
+        status: status,
+        date: date,
+      },
+    });
   } catch (error) {
+    console.log(error);
     return {
       message: 'Database Error: Failed to Create Invoice.',
     };
   } finally {
-    await client.end();
+    await prisma.$disconnect();
   }
 
   revalidatePath('/dashboard/invoices');
@@ -74,8 +78,8 @@ export async function updateInvoice(
   prevState: State,
   formData: FormData,
 ) {
-  const client = new Client();
-  await client.connect();
+  const prisma = new PrismaClient();
+
   const validatedFields = UpdateInvoice.safeParse({
     customerId: formData.get('customerId'),
     amount: formData.get('amount'),
@@ -92,18 +96,23 @@ export async function updateInvoice(
   const { customerId, amount, status } = validatedFields.data;
   const amountInCents = amount * 100;
 
-  const text =
-    'UPDATE invoices SET customer_id = $1, amount = $2, status = $3  WHERE id = $4';
-  const values = [customerId, amountInCents, status, id];
-
   try {
-    await client.query(text, values);
+    const updateInvoice = await prisma.invoices.update({
+      where: {
+        id: id,
+      },
+      data: {
+        customerId: customerId,
+        amount: amountInCents,
+        status: status,
+      },
+    });
   } catch (error) {
     return {
       message: 'Database Error: Failed to Update Invoice.',
     };
   } finally {
-    await client.end();
+    await prisma.$disconnect();
   }
 
   revalidatePath('/dashboard/invoices');
@@ -111,19 +120,21 @@ export async function updateInvoice(
 }
 
 export async function deleteInvoice(id: string) {
-  const client = new Client();
-  await client.connect();
-  const text = `DELETE FROM invoices WHERE id = $1`;
-  const values = [id];
+  const prisma = new PrismaClient();
 
   try {
-    await client.query(text, values);
+    const deleteInvoice = await prisma.invoices.delete({
+      where: {
+        id: id,
+      },
+    });
+
     revalidatePath('/dashboard/invoices');
     return { message: 'Deleted Invoice.' };
   } catch (error) {
     return { message: 'Database Error: Failed to Delete Invoice.' };
   } finally {
-    await client.end();
+    await prisma.$disconnect();
   }
 }
 
