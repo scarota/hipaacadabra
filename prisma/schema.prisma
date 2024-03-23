@@ -1,0 +1,38 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["relationJoins"]
+}
+
+datasource db {
+  provider = "cockroachdb"
+  url      = env("DATABASE_URL")
+}
+
+model customers {
+  id       String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name     String     @db.String(255)
+  email    String     @db.String(255)
+  imageUrl String     @map("image_url") @db.String(255)
+  invoice  invoices[]
+}
+
+model invoices {
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  customerId String    @map("customer_id") @db.Uuid
+  amount     Int
+  status     String    @db.String(255)
+  date       DateTime  @db.Date
+  customers  customers @relation(fields: [customerId], references: [id])
+}
+
+model revenue {
+  month   String @unique @db.String(4)
+  revenue Int
+}
+
+model users {
+  id       String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name     String @db.String(255)
+  email    String @unique
+  password String
+}
