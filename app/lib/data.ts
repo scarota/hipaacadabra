@@ -1,4 +1,3 @@
-import { Client } from 'pg';
 import { PrismaClient } from '@prisma/client';
 import { CustomersTableType, InvoicesTable } from './definitions';
 import { formatCurrency } from './utils';
