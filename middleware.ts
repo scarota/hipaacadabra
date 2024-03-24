@@ -1,9 +1,9 @@
-import NextAuth from 'next-auth';
-import { authConfig } from './auth.config';
+import { withAuth } from '@kinde-oss/kinde-auth-nextjs/middleware';
 
-export default NextAuth(authConfig).auth;
+export default function middleware(req: Request) {
+  return withAuth(req);
+}
 
 export const config = {
-  // https://nextjs.org/docs/app/building-your-application/routing/middleware#matcher
-  matcher: ['/((?!api|_next/static|_next/image|.*\\.png$).*)'],
+  matcher: ['/dashboard'],
 };
