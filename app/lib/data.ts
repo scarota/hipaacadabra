@@ -5,8 +5,6 @@ import { unstable_noStore as noStore } from 'next/cache';
 import { getOrganization } from '@/app/lib/auth';
 
 export async function fetchRevenue() {
-  // Add noStore() here to prevent the response from being cached.
-  // This is equivalent to in fetch(..., {cache: 'no-store'}).
   noStore();
   const prisma = new PrismaClient();
   try {
@@ -76,9 +74,6 @@ export async function fetchCardData() {
   const org = await getOrganization();
 
   try {
-    // You can probably combine these into a single SQL query
-    // However, we are intentionally splitting them to demonstrate
-    // how to initialize multiple queries in parallel with JS.
     const invoiceCountPromise = prisma.invoices.count({
       where: {
         customers: {
