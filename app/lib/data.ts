@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { CustomersTableType, InvoicesTable } from './definitions';
 import { formatCurrency } from './utils';
 import { unstable_noStore as noStore } from 'next/cache';
+import { getOrganization } from '@/app/lib/auth';
 
 export async function fetchRevenue() {
   // Add noStore() here to prevent the response from being cached.
@@ -28,6 +29,8 @@ export async function fetchRevenue() {
 export async function fetchLatestInvoices() {
   noStore();
   const prisma = new PrismaClient();
+  const org = await getOrganization();
+
   try {
     const data = await prisma.invoices.findMany({
       relationLoadStrategy: 'join',
@@ -41,6 +44,11 @@ export async function fetchLatestInvoices() {
             imageUrl: true,
             email: true,
           },
+        },
+      },
+      where: {
+        customers: {
+          org_code: org,
         },
       },
       orderBy: {
@@ -65,16 +73,33 @@ export async function fetchLatestInvoices() {
 export async function fetchCardData() {
   noStore();
   const prisma = new PrismaClient();
+  const org = await getOrganization();
 
   try {
     // You can probably combine these into a single SQL query
     // However, we are intentionally splitting them to demonstrate
     // how to initialize multiple queries in parallel with JS.
-    const invoiceCountPromise = prisma.invoices.count();
-    const customerCountPromise = prisma.customers.count();
+    const invoiceCountPromise = prisma.invoices.count({
+      where: {
+        customers: {
+          org_code: org,
+        },
+      },
+    });
+
+    const customerCountPromise = prisma.customers.count({
+      where: {
+        org_code: org,
+      },
+    });
 
     const invoiceStatusPromise = prisma.invoices.groupBy({
       by: ['status'],
+      where: {
+        customers: {
+          org_code: org,
+        },
+      },
       _sum: {
         amount: true,
       },
@@ -131,6 +156,8 @@ export async function fetchFilteredInvoices(
 
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
   const wildcardquery = `%${query}%`;
+  const org = await getOrganization();
+
   try {
     const data = await prisma.$queryRaw<InvoicesTable[]>`SELECT
     invoices.id,
@@ -142,11 +169,12 @@ export async function fetchFilteredInvoices(
     customers.image_url
   FROM invoices
   JOIN customers ON invoices.customer_id = customers.id
-      WHERE lower(customers.name) LIKE lower(${wildcardquery}) OR
+      WHERE customers.org_code = ${org} AND
+      (lower(customers.name) LIKE lower(${wildcardquery}) OR
       lower(customers.email) LIKE lower(${wildcardquery}) OR
       lower(invoices.amount::text) LIKE lower(${wildcardquery}) OR
       lower(invoices.date::text) LIKE lower(${wildcardquery})  OR
-      lower(invoices.status) LIKE lower(${wildcardquery})
+      lower(invoices.status) LIKE lower(${wildcardquery}))
       ORDER BY invoices.date DESC
     LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
       `;
@@ -163,17 +191,19 @@ export async function fetchFilteredInvoices(
 export async function fetchInvoicesPages(query: string) {
   noStore();
   const prisma = new PrismaClient();
-
   const wildcardquery = `%${query}%`;
+  const org = await getOrganization();
+
   try {
     const data = await prisma.$queryRaw<string[]>`SELECT count(*)
       FROM invoices
       JOIN customers ON invoices.customer_id = customers.id
-      WHERE lower(customers.name) LIKE lower(${wildcardquery}) OR
+      WHERE customers.org_code = ${org} AND
+      (lower(customers.name) LIKE lower(${wildcardquery}) OR
       lower(customers.email) LIKE lower(${wildcardquery}) OR
       lower(invoices.amount::text) LIKE lower(${wildcardquery}) OR
       lower(invoices.date::text) LIKE lower(${wildcardquery})  OR
-      lower(invoices.status) LIKE lower(${wildcardquery}) 
+      lower(invoices.status) LIKE lower(${wildcardquery}))
       `;
 
     const totalPages = Math.ceil(Number(eval(data[0]).count) / ITEMS_PER_PAGE);
@@ -240,6 +270,7 @@ export async function fetchFilteredCustomers(query: string) {
   noStore();
   const prisma = new PrismaClient();
   const wildcardquery = `%${query}%`;
+  const org = await getOrganization();
 
   try {
     const data = await prisma.$queryRaw<CustomersTableType[]>`SELECT
@@ -253,8 +284,9 @@ export async function fetchFilteredCustomers(query: string) {
   FROM customers
   LEFT JOIN invoices ON customers.id = invoices.customer_id
   WHERE
-    lower(customers.name) LIKE lower(${wildcardquery}) OR
-      lower(customers.email) LIKE lower(${wildcardquery})
+    customers.org_code = ${org} AND
+    (lower(customers.name) LIKE lower(${wildcardquery}) OR
+      lower(customers.email) LIKE lower(${wildcardquery}))
   GROUP BY customers.id, customers.name, customers.email, customers.image_url
   ORDER BY customers.name ASC
       `;
