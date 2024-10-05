@@ -3,6 +3,7 @@ import { CustomersTableType, InvoicesTable } from './definitions';
 import { formatCurrency } from './utils';
 import { unstable_noStore as noStore } from 'next/cache';
 import { getOrganization } from '@/app/lib/auth';
+import { getRevenue } from '@prisma/client/sql';
 
 export async function fetchRevenue() {
   noStore();
@@ -12,9 +13,12 @@ export async function fetchRevenue() {
     // Don't do this in production :)
 
     // console.log('Fetching revenue data...');
-    // await new Promise((resolve) => setTimeout(resolve, 3000));
-    const revenue = await prisma.revenue.findMany();
+    // await new Promise((resolve) => setTimeout(resolve, 3000))
+    const revenue = await prisma.$queryRawTyped(getRevenue());
     // console.log('Data fetch completed after 3 seconds.');
+
+    console.log(revenue);
+
     return revenue;
   } catch (error) {
     console.error('Database Error:', error);

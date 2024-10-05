@@ -2,7 +2,7 @@ import { generateYAxis } from '@/app/lib/utils';
 import { CalendarIcon } from '@heroicons/react/24/outline';
 import { lusitana } from '@/app/ui/fonts';
 import { fetchRevenue } from '@/app/lib/data';
-
+import { Revenue } from '@/app/lib/definitions';
 // This component is representational only.
 // For data visualization UI, check out:
 // https://www.tremor.so/
@@ -11,8 +11,15 @@ import { fetchRevenue } from '@/app/lib/data';
 
 export default async function RevenueChart() {
   const revenue = await fetchRevenue();
+
   const chartHeight = 350;
-  const { yAxisLabels, topLabel } = generateYAxis(revenue);
+  const validRevenue = revenue
+    .filter((r) => r.month !== null)
+    .map((r) => ({
+      ...r,
+      revenue: r.revenue !== null ? Number(r.revenue) : 0, // Convert Decimal to number
+    })) as Revenue[];
+  const { yAxisLabels, topLabel } = generateYAxis(validRevenue);
 
   if (!revenue || revenue.length === 0) {
     return <p className="mt-4 text-gray-400">No data available.</p>;
@@ -34,8 +41,11 @@ export default async function RevenueChart() {
             ))}
           </div>
 
-          {revenue.map((month) => (
+          {validRevenue.map((month) => (
             <div key={month.month} className="flex flex-col items-center gap-2">
+              <p className="-rotate-90 text-xs text-gray-400 sm:rotate-0">
+                ${month.revenue}
+              </p>
               <div
                 className="w-full rounded-md bg-blue-300"
                 style={{
