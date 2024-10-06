@@ -27,3 +27,22 @@ export async function getOrganization(): Promise<string | undefined> {
     return undefined;
   }
 }
+
+export async function getUserEmail(): Promise<string | undefined> {
+  try {
+    const session = getKindeServerSession();
+    if (!session || typeof session.getUser !== 'function') {
+      console.error('Invalid session or getUser function not found.');
+      return undefined;
+    }
+    const user = await session.getUser();
+    if (!user || typeof user.email !== 'string') {
+      console.warn('User not found or email is missing.');
+      return undefined;
+    }
+    return user.email;
+  } catch (error) {
+    console.error('Error fetching user email:', error);
+    return undefined;
+  }
+}
