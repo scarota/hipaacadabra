@@ -8,16 +8,10 @@ import { getRevenue } from '@prisma/client/sql';
 export async function fetchRevenue() {
   noStore();
   const prisma = new PrismaClient();
+  const org = await getOrganization();
+
   try {
-    // Artificially delay a response for demo purposes.
-    // Don't do this in production :)
-
-    // console.log('Fetching revenue data...');
-    // await new Promise((resolve) => setTimeout(resolve, 3000))
-    const revenue = await prisma.$queryRawTyped(getRevenue());
-    // console.log('Data fetch completed after 3 seconds.');
-
-    console.log(revenue);
+    const revenue = await prisma.$queryRawTyped(getRevenue(org!));
 
     return revenue;
   } catch (error) {
@@ -104,15 +98,11 @@ export async function fetchCardData() {
       },
     });
 
-    // await new Promise((resolve) => setTimeout(resolve, 5000));
-
     const data = await Promise.all([
       invoiceCountPromise,
       customerCountPromise,
       invoiceStatusPromise,
     ]);
-
-    // console.log('Data fetch completed after 3 seconds.');
 
     const numberOfInvoices = data[0];
     const numberOfCustomers = data[1];

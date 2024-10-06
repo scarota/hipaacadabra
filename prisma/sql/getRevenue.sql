@@ -1,5 +1,7 @@
-SELECT TO_CHAR(date, 'Mon') AS month, SUM(amount) / 100.0 AS revenue
-FROM invoices
-WHERE date >= CURRENT_DATE - INTERVAL '12 months'
-GROUP BY TO_CHAR(date, 'Mon'), EXTRACT(MONTH FROM date)
-ORDER BY EXTRACT(MONTH FROM date);
+SELECT TO_CHAR(i.date, 'Mon') AS month, SUM(i.amount) / 100.0 AS revenue
+FROM invoices i
+JOIN customers c ON i.customer_id = c.id
+WHERE i.date >= CURRENT_DATE - INTERVAL '12 months'
+AND c.org_code = $1
+GROUP BY TO_CHAR(i.date, 'Mon'), EXTRACT(MONTH FROM i.date)
+ORDER BY EXTRACT(MONTH FROM i.date);
