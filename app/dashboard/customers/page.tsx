@@ -6,14 +6,15 @@ export const metadata: Metadata = {
   title: 'Customers',
 };
 
-export default function Page({
-  searchParams,
-}: {
-  searchParams?: {
-    query?: string;
-    page?: string;
-  };
-}) {
+export default async function Page(
+  props: {
+    searchParams?: Promise<{
+      query?: string;
+      page?: string;
+    }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const query = searchParams?.query || '';
 
   return <CustomersTable query={query} />;
