@@ -4,7 +4,6 @@ import AcmeLogo from '@/app/ui/acme-logo';
 import { PowerIcon, UserIcon } from '@heroicons/react/24/outline';
 import { LogoutLink } from '@kinde-oss/kinde-auth-nextjs/components';
 import { getUserEmail } from '@/app/lib/auth';
-import NavLinksBottom from '@/app/ui/dashboard/nav-links-bottom';
 
 export default function SideNav() {
   return (
@@ -20,7 +19,6 @@ export default function SideNav() {
       <div className="flex grow flex-row justify-between space-x-2 md:flex-col md:space-x-0 md:space-y-2">
         <NavLinks />
         <div className="hidden h-auto w-full grow rounded-md bg-gray-50 md:block"></div>
-        <NavLinksBottom />
         <div className="flex h-[48px] w-full grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium md:flex-none md:justify-start md:p-2 md:px-3">
           <UserIcon className="h-6 w-6" />
           <div className="hidden md:block">{getUserEmail()}</div>
