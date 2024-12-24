@@ -50,7 +50,7 @@ export async function createInvoice(prevState: State, formData: FormData) {
   const date = new Date().toISOString();
 
   try {
-    const createInvoice = await prisma.invoices.create({
+    await prisma.invoices.create({
       data: {
         customerId: customerId,
         amount: amountInCents,
@@ -95,7 +95,7 @@ export async function updateInvoice(
   const amountInCents = amount * 100;
 
   try {
-    const updateInvoice = await prisma.invoices.update({
+    await prisma.invoices.update({
       where: {
         id: id,
       },
@@ -121,7 +121,7 @@ export async function deleteInvoice(id: string) {
   const prisma = new PrismaClient();
 
   try {
-    const deleteInvoice = await prisma.invoices.delete({
+    await prisma.invoices.delete({
       where: {
         id: id,
       },

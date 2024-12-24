@@ -236,6 +236,7 @@ export async function fetchInvoiceById(id: string) {
 
 export async function fetchCustomers() {
   const prisma = new PrismaClient();
+  const org = await getOrganization();
   try {
     const customers = await prisma.customers.findMany({
       select: {
@@ -244,6 +245,9 @@ export async function fetchCustomers() {
       },
       orderBy: {
         name: 'asc',
+      },
+      where: {
+        org_code: org,
       },
     });
     return customers;
