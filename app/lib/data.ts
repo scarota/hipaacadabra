@@ -299,20 +299,3 @@ export async function fetchFilteredCustomers(query: string) {
     await prisma.$disconnect();
   }
 }
-
-export async function getUser(email: string) {
-  const prisma = new PrismaClient();
-  try {
-    const user = await prisma.users.findUnique({
-      where: {
-        email: email,
-      },
-    });
-    return user;
-  } catch (error) {
-    console.error('Failed to fetch user:', error);
-    throw new Error('Failed to fetch user.');
-  } finally {
-    await prisma.$disconnect();
-  }
-}
