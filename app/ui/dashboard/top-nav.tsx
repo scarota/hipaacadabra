@@ -37,6 +37,9 @@ export default function TopNav() {
             >
               Teams
             </Link>
+            <LogoutLink className="text-sm text-gray-700 hover:text-gray-900">
+              Sign Out
+            </LogoutLink>
           </div>
         </div>
         <div className="group relative">
@@ -44,12 +47,12 @@ export default function TopNav() {
             <span className="font-medium">{getUserEmail()}</span>
             <ChevronDownIcon className="h-4 w-4 text-gray-500" />
           </button>
-          <div className="absolute right-0 top-full mt-1 hidden w-48 rounded-md border bg-white shadow-lg group-hover:block">
+          {/* <div className="absolute right-0 top-full mt-1 hidden w-48 rounded-md border bg-white shadow-lg group-hover:block">
             <LogoutLink className="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
               <PowerIcon className="h-5 w-5" />
               <span>Sign Out</span>
             </LogoutLink>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
