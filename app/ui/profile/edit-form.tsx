@@ -2,7 +2,15 @@
 
 import { UserIcon } from '@heroicons/react/24/outline';
 
-export default function EditProfileForm() {
+interface EditProfileFormProps {
+  firstName?: string;
+  lastName?: string;
+}
+
+export default function EditProfileForm({
+  firstName = '',
+  lastName = '',
+}: EditProfileFormProps) {
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
       <div className="mb-8 text-center">
@@ -31,6 +39,7 @@ export default function EditProfileForm() {
                 type="text"
                 id="firstName"
                 name="firstName"
+                defaultValue={firstName}
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 placeholder="Enter your first name"
               />
@@ -47,6 +56,7 @@ export default function EditProfileForm() {
                 type="text"
                 id="lastName"
                 name="lastName"
+                defaultValue={lastName}
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 placeholder="Enter your last name"
               />

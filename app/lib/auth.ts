@@ -36,6 +36,7 @@ export async function getUserEmail(): Promise<string | undefined> {
       return undefined;
     }
     const user = await session.getUser();
+
     if (!user || typeof user.email !== 'string') {
       console.warn('User not found or email is missing.');
       return undefined;
@@ -43,6 +44,32 @@ export async function getUserEmail(): Promise<string | undefined> {
     return user.email;
   } catch (error) {
     console.error('Error fetching user email:', error);
+    return undefined;
+  }
+}
+export async function getUserInfo(): Promise<
+  { firstName?: string; lastName?: string; id?: string } | undefined
+> {
+  try {
+    const session = getKindeServerSession();
+    if (!session || typeof session.getUser !== 'function') {
+      console.error('Invalid session or getUser function not found.');
+      return undefined;
+    }
+
+    const user = await session.getUser();
+    if (!user) {
+      console.warn('User not found.');
+      return undefined;
+    }
+
+    return {
+      firstName: user.given_name || undefined,
+      lastName: user.family_name || undefined,
+      id: user.id || undefined,
+    };
+  } catch (error) {
+    console.error('Error fetching user info:', error);
     return undefined;
   }
 }

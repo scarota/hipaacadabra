@@ -1,4 +1,4 @@
-import SideNav from '@/app/ui/dashboard/sidenav';
+// import SideNav from '@/app/ui/dashboard/sidenav';
 import TopNav from '@/app/ui/dashboard/top-nav';
 import { Metadata } from 'next';
 
