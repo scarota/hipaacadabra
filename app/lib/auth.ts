@@ -1,4 +1,5 @@
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
+import { Users, init } from '@kinde/management-api-js';
 
 export async function getOrganization(): Promise<string | undefined> {
   try {
@@ -73,3 +74,15 @@ export async function getUserInfo(): Promise<
     return undefined;
   }
 }
+
+export async function testing() {
+  init();
+  const { users } = await Users.getUsers();
+  console.log(users);
+
+  return {
+    users,
+  };
+}
+
+testing();
