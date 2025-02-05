@@ -27,6 +27,10 @@ export async function fetchLatestInvoices() {
   const prisma = new PrismaClient();
   const org = await getOrganization();
 
+  if (!org) {
+    return [];
+  }
+
   try {
     const data = await prisma.invoices.findMany({
       relationLoadStrategy: 'join',
@@ -70,6 +74,15 @@ export async function fetchCardData() {
   noStore();
   const prisma = new PrismaClient();
   const org = await getOrganization();
+
+  if (!org) {
+    return {
+      numberOfCustomers: 0,
+      numberOfInvoices: 0,
+      totalPaidInvoices: formatCurrency(0),
+      totalPendingInvoices: formatCurrency(0),
+    };
+  }
 
   try {
     const invoiceCountPromise = prisma.invoices.count({
