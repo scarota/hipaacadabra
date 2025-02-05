@@ -108,16 +108,16 @@ export async function fetchCardData() {
     const numberOfCustomers = data[1];
     const totalPaidInvoices = formatCurrency(
       Number(
-        data[2][0].status == 'paid'
-          ? data[2][0]._sum.amount
-          : data[2][1]._sum.amount,
+        data[2][0]?.status == 'paid'
+          ? data[2][0]?._sum.amount
+          : (data[2][1]?._sum.amount ?? 0),
       ),
     );
     const totalPendingInvoices = formatCurrency(
       Number(
-        data[2][1].status == 'pending'
-          ? data[2][1]._sum.amount
-          : data[2][0]._sum.amount,
+        data[2][1]?.status == 'pending'
+          ? data[2][1]?._sum.amount
+          : (data[2][0]?._sum.amount ?? 0),
       ),
     );
 
