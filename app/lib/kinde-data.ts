@@ -29,27 +29,9 @@ export async function getOrganization(): Promise<string | undefined> {
   }
 }
 
-export async function getUserEmail(): Promise<string | undefined> {
-  try {
-    const session = getKindeServerSession();
-    if (!session || typeof session.getUser !== 'function') {
-      console.error('Invalid session or getUser function not found.');
-      return undefined;
-    }
-    const user = await session.getUser();
-
-    if (!user || typeof user.email !== 'string') {
-      console.warn('User not found or email is missing.');
-      return undefined;
-    }
-    return user.email;
-  } catch (error) {
-    console.error('Error fetching user email:', error);
-    return undefined;
-  }
-}
 export async function getUserInfo(): Promise<
-  { firstName?: string; lastName?: string; id?: string } | undefined
+  | { firstName?: string; lastName?: string; email?: string; id?: string }
+  | undefined
 > {
   try {
     const session = getKindeServerSession();
@@ -67,6 +49,7 @@ export async function getUserInfo(): Promise<
     return {
       firstName: user.given_name || undefined,
       lastName: user.family_name || undefined,
+      email: user.email || undefined,
       id: user.id || undefined,
     };
   } catch (error) {

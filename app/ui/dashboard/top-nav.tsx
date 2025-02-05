@@ -9,10 +9,12 @@ import {
   WindowIcon,
 } from '@heroicons/react/24/outline';
 import { LogoutLink } from '@kinde-oss/kinde-auth-nextjs/components';
-import { getUserEmail } from '@/app/lib/auth';
+import { getUserInfo } from '@/app/lib/kinde-data';
 import NavLinks from '@/app/ui/dashboard/nav-links';
 
-export default function TopNav() {
+export default async function TopNav() {
+  const userInfo = await getUserInfo();
+
   return (
     <div className="w-full border-b bg-white">
       <div className="flex h-14 items-center justify-between px-4">
@@ -40,7 +42,7 @@ export default function TopNav() {
         </div>
         <div className="group relative">
           <button className="flex items-center gap-2 text-sm text-gray-700">
-            <span className="font-medium">{getUserEmail()}</span>
+            <span className="font-medium">{userInfo?.email}</span>
             <ChevronDownIcon className="h-4 w-4 text-gray-500 transition-transform duration-200 group-hover:rotate-180" />
           </button>
           {/* Submenu */}

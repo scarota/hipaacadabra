@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { CustomersTableType, InvoicesTable } from './definitions';
 import { formatCurrency } from './utils';
 import { unstable_noStore as noStore } from 'next/cache';
-import { getOrganization } from '@/app/lib/auth';
+import { getOrganization } from '@/app/lib/kinde-data';
 import { getRevenue } from '@prisma/client/sql';
 
 export async function fetchRevenue() {
