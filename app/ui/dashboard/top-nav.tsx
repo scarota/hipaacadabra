@@ -39,7 +39,7 @@ export default async function TopNav() {
               Profile
             </Link>
             <Link
-              href="/settings"
+              href="/dashboard/settings"
               className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
             >
               <CogIcon className="mr-3 h-4 w-4" />
