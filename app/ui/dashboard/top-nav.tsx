@@ -5,8 +5,6 @@ import {
   ChevronDownIcon,
   UserIcon,
   CogIcon,
-  CommandLineIcon,
-  WindowIcon,
 } from '@heroicons/react/24/outline';
 import { LogoutLink } from '@kinde-oss/kinde-auth-nextjs/components';
 import { getUserInfo } from '@/app/lib/kinde-data';
@@ -24,24 +22,10 @@ export default async function TopNav() {
           </div>
           <div className="flex items-center space-x-4">
             <NavLinks />
-            <Link
-              href="/schema"
-              className="flex items-center text-sm text-gray-700 hover:text-gray-900"
-            >
-              <CommandLineIcon className="mr-2 h-5 w-5" />
-              Schema
-            </Link>
-            <Link
-              href="/portal"
-              className="flex items-center text-sm text-gray-700 hover:text-gray-900"
-            >
-              <WindowIcon className="mr-2 h-5 w-5" />
-              Portal
-            </Link>
           </div>
         </div>
         <div className="group relative">
-          <button className="flex items-center gap-2 text-sm text-gray-700">
+          <button className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
             <span className="font-medium">{userInfo?.email}</span>
             <ChevronDownIcon className="h-4 w-4 text-gray-500 transition-transform duration-200 group-hover:rotate-180" />
           </button>

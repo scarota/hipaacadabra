@@ -4,6 +4,8 @@ import {
   UserGroupIcon,
   HomeIcon,
   DocumentDuplicateIcon,
+  CommandLineIcon,
+  WindowIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -19,6 +21,8 @@ const links = [
     icon: DocumentDuplicateIcon,
   },
   { name: 'Customers', href: '/dashboard/customers', icon: UserGroupIcon },
+  { name: 'Schema', href: '/dashboard/schema', icon: CommandLineIcon },
+  { name: 'Portal', href: '/dashboard/portal', icon: WindowIcon },
 ];
 
 export default function NavLinks() {
