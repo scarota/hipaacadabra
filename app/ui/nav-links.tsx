@@ -17,10 +17,10 @@ const links = [
   { name: 'Home', href: '/dashboard', icon: HomeIcon },
   {
     name: 'Invoices',
-    href: '/dashboard/invoices',
+    href: '/invoices',
     icon: DocumentDuplicateIcon,
   },
-  { name: 'Customers', href: '/dashboard/customers', icon: UserGroupIcon },
+  { name: 'Customers', href: '/customers', icon: UserGroupIcon },
   { name: 'Schema', href: '/schema', icon: CommandLineIcon },
   { name: 'Portal', href: '/portal', icon: WindowIcon },
 ];

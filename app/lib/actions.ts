@@ -67,8 +67,8 @@ export async function createInvoice(prevState: State, formData: FormData) {
     await prisma.$disconnect();
   }
 
-  revalidatePath('/dashboard/invoices');
-  redirect('/dashboard/invoices');
+  revalidatePath('/invoices');
+  redirect('/invoices');
 }
 
 export async function updateInvoice(
@@ -113,8 +113,8 @@ export async function updateInvoice(
     await prisma.$disconnect();
   }
 
-  revalidatePath('/dashboard/invoices');
-  redirect('/dashboard/invoices');
+  revalidatePath('/invoices');
+  redirect('/invoices');
 }
 
 export async function deleteInvoice(id: string) {
@@ -127,7 +127,7 @@ export async function deleteInvoice(id: string) {
       },
     });
 
-    revalidatePath('/dashboard/invoices');
+    revalidatePath('/invoices');
     return { message: 'Deleted Invoice.' };
   } catch (error) {
     return { message: 'Database Error: Failed to Delete Invoice.' };

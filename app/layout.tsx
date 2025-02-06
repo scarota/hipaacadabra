@@ -21,12 +21,7 @@ export default function RootLayout({
   return (
     <AuthProvider>
       <html lang="en">
-        <body className={`${inter.className} antialiased`}>
-          <div className="flex h-screen flex-col">
-            <TopNav />
-            {children}
-          </div>
-        </body>
+        <body className={`${inter.className} antialiased`}>{children}</body>
       </html>
     </AuthProvider>
   );
