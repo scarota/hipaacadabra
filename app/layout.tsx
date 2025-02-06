@@ -2,7 +2,6 @@ import '@/app/ui/global.css';
 import { inter } from '@/app/ui/fonts';
 import { Metadata } from 'next';
 import { AuthProvider } from './AuthProvider';
-import TopNav from '@/app/ui/top-nav';
 
 export const metadata: Metadata = {
   title: {
