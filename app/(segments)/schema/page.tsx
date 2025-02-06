@@ -1,3 +1,9 @@
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Schema',
+};
+
 export default function SchemaPage() {
   return (
     <div className="flex h-screen items-center justify-center">

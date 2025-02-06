@@ -8,7 +8,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { LogoutLink } from '@kinde-oss/kinde-auth-nextjs/components';
 import { getUserInfo } from '@/app/lib/kinde-data';
-import NavLinks from '@/app/ui/dashboard/nav-links';
+import NavLinks from '@/app/ui/nav-links';
 
 export default async function TopNav() {
   const userInfo = await getUserInfo();
@@ -32,14 +32,14 @@ export default async function TopNav() {
           {/* Submenu */}
           <div className="absolute right-0 mt-2 w-48 origin-top-right scale-0 transform rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition-all duration-200 group-hover:scale-100">
             <Link
-              href="/dashboard/profile"
+              href="/profile"
               className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
             >
               <UserIcon className="mr-3 h-4 w-4" />
               Profile
             </Link>
             <Link
-              href="/dashboard/settings"
+              href="/settings"
               className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
             >
               <CogIcon className="mr-3 h-4 w-4" />

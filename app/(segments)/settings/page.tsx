@@ -1,3 +1,9 @@
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Settings',
+};
+
 export default function SettingsPage() {
   return (
     <div className="flex h-screen items-center justify-center">
