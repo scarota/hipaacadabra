@@ -14,7 +14,7 @@ export default function EditProfileForm({
   email = '',
 }: EditProfileFormProps) {
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8">
+    <div className="mx-auto max-w-2xl px-4">
       <div className="mb-8 text-center">
         <div className="mx-auto mb-4 h-24 w-24 rounded-full bg-gray-100 p-4">
           <UserIcon className="h-full w-full text-gray-400" />
