@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 export default function SettingsPage() {
   return (
-    <div className="-m-8 flex h-full">
+    <div className="-m-8 flex h-screen">
       <div className="w-64 border-r bg-white">
         <SideNav />
       </div>
