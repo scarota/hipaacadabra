@@ -8,7 +8,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { LogoutLink } from '@kinde-oss/kinde-auth-nextjs/components';
 import { getUserInfo } from '@/app/lib/kinde-data';
-import NavLinks from '@/app/ui/topnav-links';
+import NavLinks from '@/app/ui/navigation/topnav-links';
 
 export default async function TopNav() {
   const userInfo = await getUserInfo();

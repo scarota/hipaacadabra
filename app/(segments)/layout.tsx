@@ -1,4 +1,4 @@
-import TopNav from '@/app/ui/topnav';
+import TopNav from '@/app/ui/navigation/topnav';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (

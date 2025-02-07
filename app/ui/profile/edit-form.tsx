@@ -1,6 +1,7 @@
 'use client';
 
-import { UserIcon } from '@heroicons/react/24/outline';
+import Avatar from '@/app/ui/avatar';
+import { Button } from '@/app/ui/button';
 
 interface EditProfileFormProps {
   firstName?: string;
@@ -16,8 +17,8 @@ export default function EditProfileForm({
   return (
     <div className="mx-auto max-w-2xl px-4">
       <div className="mb-8 text-center">
-        <div className="mx-auto mb-4 h-24 w-24 rounded-full bg-gray-100 p-4">
-          <UserIcon className="h-full w-full text-gray-400" />
+        <div className="mx-auto mb-4 flex justify-center">
+          <Avatar firstName={firstName} lastName={lastName} />
         </div>
         <h1 className="text-2xl font-semibold text-gray-900">
           Profile Settings
@@ -84,12 +85,7 @@ export default function EditProfileForm({
           </div>
 
           <div className="flex justify-end">
-            <button
-              type="submit"
-              className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            >
-              Update settings
-            </button>
+            <Button type="submit">Update settings</Button>
           </div>
         </form>
       </div>
