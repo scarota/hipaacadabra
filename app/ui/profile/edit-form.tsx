@@ -1,7 +1,6 @@
-'use client';
-
 import Avatar from '@/app/ui/avatar';
 import { Button } from '@/app/ui/button';
+import { updateProfile } from '@/app/lib/kinde-actions';
 
 interface EditProfileFormProps {
   firstName?: string;
@@ -29,7 +28,7 @@ export default function EditProfileForm({
       </div>
 
       <div className="rounded-lg bg-white p-6 shadow">
-        <form className="space-y-6">
+        <form action={updateProfile} className="space-y-6">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div>
               <label
@@ -77,7 +76,7 @@ export default function EditProfileForm({
                 id="email"
                 name="email"
                 defaultValue={email}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="mt-1 block w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 shadow-sm"
                 placeholder="Enter your email"
                 readOnly
               />
