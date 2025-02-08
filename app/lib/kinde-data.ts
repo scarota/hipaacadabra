@@ -1,7 +1,9 @@
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 import { Users, init } from '@kinde/management-api-js';
 
-export async function getOrganization(): Promise<string | undefined> {
+export async function getOrganization(): Promise<
+  { orgCode?: string; orgName?: string } | undefined
+> {
   try {
     // Retrieve session from Kinde
     const session = getKindeServerSession();
@@ -21,7 +23,10 @@ export async function getOrganization(): Promise<string | undefined> {
       return undefined;
     }
 
-    return org.orgCode;
+    return {
+      orgCode: org.orgCode,
+      orgName: org.orgName || org.orgCode,
+    };
   } catch (error) {
     // Log the error and return undefined
     console.error('Error fetching organization:', error);

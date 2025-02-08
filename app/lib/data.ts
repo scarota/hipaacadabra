@@ -11,7 +11,7 @@ export async function fetchRevenue() {
   const org = await getOrganization();
 
   try {
-    const revenue = await prisma.$queryRawTyped(getRevenue(org!));
+    const revenue = await prisma.$queryRawTyped(getRevenue(org?.orgCode!));
 
     return revenue;
   } catch (error) {
@@ -27,7 +27,7 @@ export async function fetchLatestInvoices() {
   const prisma = new PrismaClient();
   const org = await getOrganization();
 
-  if (!org) {
+  if (!org?.orgCode) {
     return [];
   }
 
@@ -48,7 +48,7 @@ export async function fetchLatestInvoices() {
       },
       where: {
         customers: {
-          org_code: org,
+          org_code: org.orgCode,
         },
       },
       orderBy: {
@@ -75,7 +75,7 @@ export async function fetchCardData() {
   const prisma = new PrismaClient();
   const org = await getOrganization();
 
-  if (!org) {
+  if (!org?.orgCode) {
     return {
       numberOfCustomers: 0,
       numberOfInvoices: 0,
@@ -88,14 +88,14 @@ export async function fetchCardData() {
     const invoiceCountPromise = prisma.invoices.count({
       where: {
         customers: {
-          org_code: org,
+          org_code: org.orgCode,
         },
       },
     });
 
     const customerCountPromise = prisma.customers.count({
       where: {
-        org_code: org,
+        org_code: org.orgCode,
       },
     });
 
@@ -103,7 +103,7 @@ export async function fetchCardData() {
       by: ['status'],
       where: {
         customers: {
-          org_code: org,
+          org_code: org.orgCode,
         },
       },
       _sum: {
@@ -171,7 +171,7 @@ export async function fetchFilteredInvoices(
     customers.image_url
   FROM invoices
   JOIN customers ON invoices.customer_id = customers.id
-      WHERE customers.org_code = ${org} AND
+      WHERE customers.org_code = ${org?.orgCode} AND
       (lower(customers.name) LIKE lower(${wildcardquery}) OR
       lower(customers.email) LIKE lower(${wildcardquery}) OR
       lower(invoices.amount::text) LIKE lower(${wildcardquery}) OR
@@ -200,7 +200,7 @@ export async function fetchInvoicesPages(query: string) {
     const data = await prisma.$queryRaw<string[]>`SELECT count(*)
       FROM invoices
       JOIN customers ON invoices.customer_id = customers.id
-      WHERE customers.org_code = ${org} AND
+      WHERE customers.org_code = ${org?.orgCode} AND
       (lower(customers.name) LIKE lower(${wildcardquery}) OR
       lower(customers.email) LIKE lower(${wildcardquery}) OR
       lower(invoices.amount::text) LIKE lower(${wildcardquery}) OR
@@ -248,10 +248,15 @@ export async function fetchInvoiceById(id: string) {
 }
 
 export async function fetchCustomers() {
+  noStore();
   const prisma = new PrismaClient();
   const org = await getOrganization();
+
   try {
     const customers = await prisma.customers.findMany({
+      where: {
+        org_code: org?.orgCode || '',
+      },
       select: {
         id: true,
         name: true,
@@ -259,13 +264,11 @@ export async function fetchCustomers() {
       orderBy: {
         name: 'asc',
       },
-      where: {
-        org_code: org,
-      },
     });
+
     return customers;
-  } catch (err) {
-    console.error('Database Error:', err);
+  } catch (error) {
+    console.error('Database Error:', error);
     throw new Error('Failed to fetch all customers.');
   } finally {
     await prisma.$disconnect();
@@ -290,7 +293,7 @@ export async function fetchFilteredCustomers(query: string) {
   FROM customers
   LEFT JOIN invoices ON customers.id = invoices.customer_id
   WHERE
-    customers.org_code = ${org} AND
+    customers.org_code = ${org?.orgCode} AND
     (lower(customers.name) LIKE lower(${wildcardquery}) OR
       lower(customers.email) LIKE lower(${wildcardquery}))
   GROUP BY customers.id, customers.name, customers.email, customers.image_url
