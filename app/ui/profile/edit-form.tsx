@@ -1,6 +1,6 @@
 'use client';
 
-import { useFormState } from 'react-dom';
+import { useActionState } from 'react';
 import Avatar from '@/app/ui/avatar';
 import { Button } from '@/app/ui/button';
 import { updateProfile } from '@/app/lib/kinde-actions';
@@ -18,7 +18,7 @@ export default function EditProfileForm({
   email,
 }: EditProfileFormProps) {
   const initialState: State = { message: null, errors: {} };
-  const [state, dispatch] = useFormState(updateProfile, initialState);
+  const [state, dispatch] = useActionState(updateProfile, initialState);
 
   return (
     <div className="mx-auto max-w-2xl px-4">
