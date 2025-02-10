@@ -5,13 +5,13 @@ import { updateProfile } from '@/app/lib/kinde-actions';
 interface EditProfileFormProps {
   firstName?: string;
   lastName?: string;
-  email?: string;
+  email: string;
 }
 
 export default function EditProfileForm({
   firstName = '',
   lastName = '',
-  email = '',
+  email,
 }: EditProfileFormProps) {
   return (
     <div className="mx-auto max-w-2xl px-4">

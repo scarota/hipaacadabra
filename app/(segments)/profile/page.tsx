@@ -9,11 +9,15 @@ export const metadata: Metadata = {
 export default async function ProfilePage() {
   const userInfo = await getUserInfo();
 
+  if (!userInfo) {
+    return null;
+  }
+
   return (
     <EditProfileForm
-      firstName={userInfo?.firstName}
-      lastName={userInfo?.lastName}
-      email={userInfo?.email}
+      firstName={userInfo.firstName}
+      lastName={userInfo.lastName}
+      email={userInfo.email}
     />
   );
 }

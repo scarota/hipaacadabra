@@ -35,7 +35,7 @@ export async function getOrganization(): Promise<
 }
 
 export async function getUserInfo(): Promise<
-  | { firstName?: string; lastName?: string; email?: string; id?: string }
+  | { firstName?: string; lastName?: string; email: string; id: string }
   | undefined
 > {
   try {
@@ -46,16 +46,16 @@ export async function getUserInfo(): Promise<
     }
 
     const user = await session.getUser();
-    if (!user) {
-      console.warn('User not found.');
+    if (!user || !user.email || !user.id) {
+      console.warn('User not found or required fields missing.');
       return undefined;
     }
 
     return {
-      firstName: user.given_name || undefined,
-      lastName: user.family_name || undefined,
-      email: user.email || undefined,
-      id: user.id || undefined,
+      firstName: user.given_name || '',
+      lastName: user.family_name || '',
+      email: user.email,
+      id: user.id,
     };
   } catch (error) {
     console.error('Error fetching user info:', error);

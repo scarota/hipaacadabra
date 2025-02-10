@@ -13,6 +13,10 @@ import NavLinks from '@/app/ui/navigation/topnav-links';
 export default async function TopNav() {
   const userInfo = await getUserInfo();
 
+  if (!userInfo) {
+    return null;
+  }
+
   return (
     <div className="w-full border-b bg-white">
       <div className="flex h-14 items-center justify-between px-4">
@@ -26,7 +30,7 @@ export default async function TopNav() {
         </div>
         <div className="group relative">
           <button className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">
-            <span className="font-medium">{userInfo?.email}</span>
+            <span className="font-medium">{userInfo.email}</span>
             <ChevronDownIcon className="h-4 w-4 text-gray-500 transition-transform duration-200 group-hover:rotate-180" />
           </button>
           {/* Submenu */}
