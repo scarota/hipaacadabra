@@ -235,10 +235,15 @@ export async function fetchInvoiceById(id: string) {
       },
     });
 
-    const invoice = JSON.parse(JSON.stringify(data)) as typeof data;
-    invoice!.amount = data!.amount / 100;
+    if (!data) {
+      return null;
+    }
 
-    return invoice;
+    const invoice = JSON.parse(JSON.stringify(data));
+    return {
+      ...invoice,
+      amount: data.amount / 100,
+    };
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch invoice.');
