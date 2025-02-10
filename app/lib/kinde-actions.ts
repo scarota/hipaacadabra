@@ -6,8 +6,14 @@ import { Users, init } from '@kinde/management-api-js';
 import { z } from 'zod';
 
 const ProfileFormSchema = z.object({
-  firstName: z.string().min(1, 'First name is required').max(50, 'First name is too long'),
-  lastName: z.string().min(1, 'Last name is required').max(50, 'Last name is too long'),
+  firstName: z
+    .string()
+    .min(1, 'First name is required')
+    .max(50, 'First name is too long'),
+  lastName: z
+    .string()
+    .min(1, 'Last name is required')
+    .max(50, 'Last name is too long'),
 });
 
 export type State = {
@@ -18,7 +24,10 @@ export type State = {
   message?: string | null;
 };
 
-export async function updateProfile(prevState: State, formData: FormData): Promise<State> {
+export async function updateProfile(
+  prevState: State,
+  formData: FormData,
+): Promise<State> {
   const { getUser, refreshTokens } = getKindeServerSession();
   const user = await getUser();
 

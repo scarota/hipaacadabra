@@ -104,10 +104,11 @@ export default function EditProfileForm({
 
           {state.message && (
             <div
-              className={`rounded-md p-4 ${state.errors
-                ? 'bg-red-50 text-red-700'
-                : 'bg-green-50 text-green-700'
-                }`}
+              className={`rounded-md p-4 ${
+                state.errors
+                  ? 'bg-red-50 text-red-700'
+                  : 'bg-green-50 text-green-700'
+              }`}
             >
               <p className="text-sm">{state.message}</p>
             </div>
