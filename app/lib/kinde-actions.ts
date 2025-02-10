@@ -3,19 +3,46 @@
 import { revalidatePath } from 'next/cache';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 import { Users, init } from '@kinde/management-api-js';
+import { z } from 'zod';
 
-export async function updateProfile(formData: FormData) {
+const ProfileFormSchema = z.object({
+  firstName: z.string().min(1, 'First name is required').max(50, 'First name is too long'),
+  lastName: z.string().min(1, 'Last name is required').max(50, 'Last name is too long'),
+});
+
+export type State = {
+  errors?: {
+    firstName?: string[];
+    lastName?: string[];
+  };
+  message?: string | null;
+};
+
+export async function updateProfile(prevState: State, formData: FormData): Promise<State> {
   const { getUser, refreshTokens } = getKindeServerSession();
   const user = await getUser();
 
   if (!user?.id) {
-    throw new Error('Unable to update profile. User not found.');
+    return {
+      message: 'Unable to update profile. User not found.',
+    };
+  }
+
+  const validatedFields = ProfileFormSchema.safeParse({
+    firstName: formData.get('firstName'),
+    lastName: formData.get('lastName'),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Invalid form data. Please check the fields below.',
+    };
   }
 
   try {
     init();
-    const firstName = formData.get('firstName') as string;
-    const lastName = formData.get('lastName') as string;
+    const { firstName, lastName } = validatedFields.data;
 
     const payload = {
       id: user.id,
@@ -26,12 +53,16 @@ export async function updateProfile(formData: FormData) {
     };
 
     await Users.updateUser(payload);
-
     await refreshTokens();
-
     revalidatePath('/profile');
+
+    return {
+      message: 'Profile updated successfully!',
+    };
   } catch (error) {
     console.error('Failed to update profile:', error);
-    throw new Error('Failed to update profile');
+    return {
+      message: 'Failed to update profile. Please try again.',
+    };
   }
 }
