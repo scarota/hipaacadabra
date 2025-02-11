@@ -1,16 +1,22 @@
 'use client';
 
+import { useActionState } from 'react';
 import { Button } from '@/app/ui/button';
+import { updateOrganization } from '@/app/lib/kinde-actions';
+import type { State } from '@/app/lib/kinde-actions';
 
 interface GeneralFormProps {
-  organizationName?: string;
+  organizationName: string;
   logo?: string;
 }
 
 export default function GeneralForm({
-  organizationName = '',
+  organizationName,
   logo = '',
 }: GeneralFormProps) {
+  const initialState: State = { message: null, errors: {} };
+  const [state, dispatch] = useActionState(updateOrganization, initialState);
+
   return (
     <div>
       <div className="mb-8">
@@ -23,7 +29,7 @@ export default function GeneralForm({
       </div>
 
       <div className="max-w-2xl rounded-lg bg-white p-6 shadow">
-        <form className="space-y-6">
+        <form action={dispatch} className="space-y-6">
           <div className="grid grid-cols-1 gap-6">
             <div>
               <label
@@ -39,7 +45,16 @@ export default function GeneralForm({
                 defaultValue={organizationName}
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 placeholder="Enter your organization name"
+                aria-describedby="organizationName-error"
               />
+              {state.errors?.organizationName && (
+                <div
+                  id="organizationName-error"
+                  className="mt-1 text-sm text-red-600"
+                >
+                  {state.errors.organizationName.join(', ')}
+                </div>
+              )}
             </div>
 
             <div>
@@ -65,6 +80,18 @@ export default function GeneralForm({
               </p>
             </div>
           </div>
+
+          {state.message && (
+            <div
+              className={`rounded-md p-4 ${
+                state.errors
+                  ? 'bg-red-50 text-red-700'
+                  : 'bg-green-50 text-green-700'
+              }`}
+            >
+              <p className="text-sm">{state.message}</p>
+            </div>
+          )}
 
           <div className="flex justify-end">
             <Button type="submit">Update settings</Button>

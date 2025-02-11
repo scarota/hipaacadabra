@@ -9,5 +9,9 @@ export const metadata: Metadata = {
 export default async function GeneralSettingsPage() {
   const organization = await getOrganization();
 
-  return <GeneralForm organizationName={organization?.orgName} />;
+  if (!organization) {
+    return null;
+  }
+
+  return <GeneralForm organizationName={organization.orgName} />;
 }

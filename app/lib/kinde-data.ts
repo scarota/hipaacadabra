@@ -2,7 +2,7 @@ import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 import { Users, init } from '@kinde/management-api-js';
 
 export async function getOrganization(): Promise<
-  { orgCode?: string; orgName?: string } | undefined
+  { orgCode: string; orgName: string } | undefined
 > {
   try {
     // Retrieve session from Kinde
@@ -16,6 +16,8 @@ export async function getOrganization(): Promise<
 
     // Fetch organization information
     const org = await session.getOrganization();
+
+    console.log(org);
 
     // Validate the returned organization object
     if (!org || !org.orgCode) {
