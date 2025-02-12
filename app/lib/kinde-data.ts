@@ -17,8 +17,6 @@ export async function getOrganization(): Promise<
     // Fetch organization information
     const org = await session.getOrganization();
 
-    console.log(org);
-
     // Validate the returned organization object
     if (!org || !org.orgCode) {
       console.warn('Organization not found or orgCode is missing.');

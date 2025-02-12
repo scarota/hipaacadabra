@@ -121,6 +121,7 @@ export async function updateOrganization(
 
     await Organizations.updateOrganization(payload);
     await refreshTokens();
+
     revalidatePath('/settings/general');
 
     return {
