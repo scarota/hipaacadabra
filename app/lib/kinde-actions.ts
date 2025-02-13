@@ -88,7 +88,7 @@ export async function updateOrganization(
   prevState: State,
   formData: FormData,
 ): Promise<State> {
-  const { getOrganization, refreshTokens } = getKindeServerSession();
+  const { getOrganization } = getKindeServerSession();
   const org = await getOrganization();
 
   if (!org?.orgCode) {
@@ -120,7 +120,6 @@ export async function updateOrganization(
     };
 
     await Organizations.updateOrganization(payload);
-    await refreshTokens();
 
     revalidatePath('/settings/general');
 

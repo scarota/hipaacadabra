@@ -1,5 +1,5 @@
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
-import { Users, init } from '@kinde/management-api-js';
+import { Users, Organizations, init } from '@kinde/management-api-js';
 
 export async function getOrganization(): Promise<
   { orgCode: string; orgName: string } | undefined
@@ -14,18 +14,29 @@ export async function getOrganization(): Promise<
       return undefined;
     }
 
-    // Fetch organization information
-    const org = await session.getOrganization();
-
-    // Validate the returned organization object
-    if (!org || !org.orgCode) {
+    // Get the org code from the session first
+    const sessionOrg = await session.getOrganization();
+    if (!sessionOrg?.orgCode) {
       console.warn('Organization not found or orgCode is missing.');
       return undefined;
     }
 
+    // Initialize the management API
+    init();
+
+    // Fetch organization details from the management API
+    const org = await Organizations.getOrganization({
+      code: sessionOrg.orgCode,
+    });
+
+    if (!org || !org.code) {
+      console.warn('Organization not found in management API.');
+      return undefined;
+    }
+
     return {
-      orgCode: org.orgCode,
-      orgName: org.orgName || org.orgCode,
+      orgCode: org.code,
+      orgName: org.name ?? org.code,
     };
   } catch (error) {
     // Log the error and return undefined
