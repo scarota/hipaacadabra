@@ -2,13 +2,13 @@ import { PrismaClient } from '@prisma/client';
 import { CustomersTableType, InvoicesTable } from './definitions';
 import { formatCurrency } from './utils';
 import { unstable_noStore as noStore } from 'next/cache';
-import { getOrganization } from '@/app/lib/kinde-data';
+import { getUserOrganization } from '@/app/lib/kinde-data';
 import { getRevenue } from '@prisma/client/sql';
 
 export async function fetchRevenue() {
   noStore();
   const prisma = new PrismaClient();
-  const org = await getOrganization();
+  const org = await getUserOrganization();
 
   try {
     const revenue = await prisma.$queryRawTyped(getRevenue(org?.orgCode!));
@@ -25,7 +25,7 @@ export async function fetchRevenue() {
 export async function fetchLatestInvoices() {
   noStore();
   const prisma = new PrismaClient();
-  const org = await getOrganization();
+  const org = await getUserOrganization();
 
   if (!org?.orgCode) {
     return [];
@@ -73,7 +73,7 @@ export async function fetchLatestInvoices() {
 export async function fetchCardData() {
   noStore();
   const prisma = new PrismaClient();
-  const org = await getOrganization();
+  const org = await getUserOrganization();
 
   if (!org?.orgCode) {
     return {
@@ -158,7 +158,7 @@ export async function fetchFilteredInvoices(
 
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
   const wildcardquery = `%${query}%`;
-  const org = await getOrganization();
+  const org = await getUserOrganization();
 
   try {
     const data = await prisma.$queryRaw<InvoicesTable[]>`SELECT
@@ -194,7 +194,7 @@ export async function fetchInvoicesPages(query: string) {
   noStore();
   const prisma = new PrismaClient();
   const wildcardquery = `%${query}%`;
-  const org = await getOrganization();
+  const org = await getUserOrganization();
 
   try {
     const data = await prisma.$queryRaw<string[]>`SELECT count(*)
@@ -255,7 +255,7 @@ export async function fetchInvoiceById(id: string) {
 export async function fetchCustomers() {
   noStore();
   const prisma = new PrismaClient();
-  const org = await getOrganization();
+  const org = await getUserOrganization();
 
   try {
     const customers = await prisma.customers.findMany({
@@ -284,7 +284,7 @@ export async function fetchFilteredCustomers(query: string) {
   noStore();
   const prisma = new PrismaClient();
   const wildcardquery = `%${query}%`;
-  const org = await getOrganization();
+  const org = await getUserOrganization();
 
   try {
     const data = await prisma.$queryRaw<CustomersTableType[]>`SELECT

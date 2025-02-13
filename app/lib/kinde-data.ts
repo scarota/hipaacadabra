@@ -1,7 +1,7 @@
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 import { Users, Organizations, init } from '@kinde/management-api-js';
 
-export async function getOrganization(): Promise<
+export async function getUserOrganization(): Promise<
   { orgCode: string; orgName: string } | undefined
 > {
   try {
