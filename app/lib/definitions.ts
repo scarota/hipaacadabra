@@ -37,3 +37,11 @@ export type CustomerField = {
   id: string;
   name: string;
 };
+
+// Kinde Types
+export type KindeUser = {
+  email: string;
+  firstName: string;
+  lastName: string;
+  joinedOn: string;
+};
