@@ -112,6 +112,7 @@ export async function getOrganizationUsers(): Promise<KindeUser[]> {
       firstName: user.first_name || '',
       lastName: user.last_name || '',
       joinedOn: user.joined_on || new Date().toISOString(),
+      roles: user.roles || [],
     }));
   } catch (error) {
     // Log the error and return empty array

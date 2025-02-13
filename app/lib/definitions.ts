@@ -44,4 +44,5 @@ export type KindeUser = {
   firstName: string;
   lastName: string;
   joinedOn: string;
+  roles: string[];
 };
