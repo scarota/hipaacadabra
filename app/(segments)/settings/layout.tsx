@@ -1,4 +1,4 @@
-import SideNav from '@/app/ui/navigation/sidenav';
+import SettingsSideNav from '@/app/ui/navigation/settings-sidenav';
 import { protectRoute } from '@/app/lib/auth';
 
 export default async function Layout({
@@ -11,7 +11,7 @@ export default async function Layout({
   return (
     <div className="-m-8 flex min-h-screen">
       <div className="w-64 border-r bg-white">
-        <SideNav />
+        <SettingsSideNav />
       </div>
       <div className="flex-1 p-8">{children}</div>
     </div>
