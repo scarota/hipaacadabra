@@ -4,6 +4,8 @@ import { useActionState } from 'react';
 import { Button } from '@/app/ui/button';
 import { updateOrganization } from '@/app/lib/kinde-actions';
 import type { State } from '@/app/lib/kinde-actions';
+import { useRef, useState } from 'react';
+import { PhotoIcon } from '@heroicons/react/24/outline';
 
 interface GeneralFormProps {
   organizationName: string;
@@ -16,6 +18,34 @@ export default function GeneralForm({
 }: GeneralFormProps) {
   const initialState: State = { message: null, errors: {} };
   const [state, dispatch] = useActionState(updateOrganization, initialState);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>(logo);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Check file size (500KB = 512000 bytes)
+      if (file.size > 512000) {
+        alert('File is too large. Maximum size is 500KB.');
+        return;
+      }
+
+      // Check file type
+      if (!['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) {
+        alert('Invalid file type. Please upload a JPG, PNG, or GIF.');
+        return;
+      }
+
+      setSelectedFile(file);
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+    }
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
 
   return (
     <div className="max-w-2xl rounded-lg bg-white p-6 shadow">
@@ -55,18 +85,41 @@ export default function GeneralForm({
               Logo
             </label>
             <div className="mt-2 flex items-center gap-x-3">
-              <div className="h-12 w-12 overflow-hidden rounded-lg bg-gray-100">
-                {/* Logo preview will go here */}
+              <div className="h-16 w-16 overflow-hidden rounded-lg bg-gray-100">
+                {previewUrl ? (
+                  <img
+                    src={previewUrl}
+                    alt="Logo preview"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full flex-col items-center justify-center bg-gray-50 p-2">
+                    <PhotoIcon className="h-8 w-8 text-gray-400" />
+                    <span className="mt-1 text-[10px] text-gray-500">
+                      No logo
+                    </span>
+                  </div>
+                )}
               </div>
+              <input
+                type="file"
+                id="logo"
+                name="logo"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/jpeg,image/png,image/gif"
+                className="hidden"
+              />
               <button
                 type="button"
+                onClick={handleUploadClick}
                 className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
               >
-                Change
+                Upload new logo
               </button>
             </div>
             <p className="mt-2 text-xs text-gray-500">
-              JPG, GIF or PNG. 1MB max.
+              JPG, GIF or PNG. 500KB max.
             </p>
           </div>
         </div>

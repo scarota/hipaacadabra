@@ -97,6 +97,16 @@ export async function updateOrganization(
     };
   }
 
+  // Get the file from form data
+  const file = formData.get('logo') as File;
+  if (file && file.size > 0) {
+    console.log('File received:', {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+    });
+  }
+
   const validatedFields = OrganizationFormSchema.safeParse({
     organizationName: formData.get('organizationName'),
   });
