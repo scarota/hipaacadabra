@@ -11,17 +11,18 @@ export async function getCurrentUserRole() {
     }
 
     const orgUsers = await getOrganizationUsers();
+
     const currentUser = orgUsers.find((orgUser) => orgUser.email === user.email);
 
     if (!currentUser?.roles.length) {
-        return 'user';
+        return 'standard';
     }
 
     if (currentUser.roles.includes('admin')) {
         return 'admin';
     }
 
-    return 'user';
+    return 'standard';
 }
 
 export async function protectRoute(allowedRoles: string[]) {
@@ -31,7 +32,3 @@ export async function protectRoute(allowedRoles: string[]) {
         redirect('/');
     }
 }
-
-export async function protectAdminRoute() {
-    return protectRoute(['admin']);
-} 

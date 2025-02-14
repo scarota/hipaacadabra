@@ -9,9 +9,12 @@ import {
 import { LogoutLink } from '@kinde-oss/kinde-auth-nextjs/components';
 import { getUserInfo } from '@/app/lib/kinde-data';
 import NavLinks from '@/app/ui/navigation/topnav-links';
+import { getCurrentUserRole } from '@/app/lib/auth';
 
 export default async function TopNav() {
   const userInfo = await getUserInfo();
+  const userRole = await getCurrentUserRole();
+  const isAdmin = userRole === 'admin';
 
   if (!userInfo) {
     return null;
@@ -42,13 +45,15 @@ export default async function TopNav() {
               <UserIcon className="mr-3 h-4 w-4" />
               Profile
             </Link>
-            <Link
-              href="/settings/general"
-              className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-            >
-              <CogIcon className="mr-3 h-4 w-4" />
-              Settings
-            </Link>
+            {isAdmin && (
+              <Link
+                href="/settings/general"
+                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                <CogIcon className="mr-3 h-4 w-4" />
+                Settings
+              </Link>
+            )}
             <div className="my-1 border-t border-gray-100"></div>
             <LogoutLink className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
               <PowerIcon className="mr-3 h-4 w-4" />
