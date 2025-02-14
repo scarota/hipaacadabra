@@ -1,6 +1,9 @@
 import SideNav from '@/app/ui/navigation/sidenav';
+import { protectAdminRoute } from '@/app/lib/auth';
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default async function Layout({ children }: { children: React.ReactNode }) {
+  await protectAdminRoute();
+
   return (
     <div className="-m-8 flex min-h-screen">
       <div className="w-64 border-r bg-white">
