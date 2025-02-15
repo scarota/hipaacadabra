@@ -92,6 +92,12 @@ export default function GeneralForm({
                     alt="Logo preview"
                     className="h-full w-full object-cover"
                   />
+                ) : logo ? (
+                  <img
+                    src={logo}
+                    alt="Organization logo"
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   <div className="flex h-full w-full flex-col items-center justify-center bg-gray-50 p-2">
                     <PhotoIcon className="h-8 w-8 text-gray-400" />

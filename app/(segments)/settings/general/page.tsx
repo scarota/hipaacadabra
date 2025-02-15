@@ -24,7 +24,10 @@ export default async function GeneralSettingsPage() {
         </p>
       </div>
 
-      <GeneralForm organizationName={organization.orgName} />
+      <GeneralForm
+        organizationName={organization.orgName}
+        logo={organization.orgLogo}
+      />
     </div>
   );
 }

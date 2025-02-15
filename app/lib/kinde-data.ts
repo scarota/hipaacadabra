@@ -3,7 +3,7 @@ import { Organizations, init } from '@kinde/management-api-js';
 import type { KindeUser } from './definitions';
 
 export async function getUserOrganization(): Promise<
-  { orgCode: string; orgName: string } | undefined
+  { orgCode: string; orgName: string; orgLogo?: string } | undefined
 > {
   try {
     // Retrieve session from Kinde
@@ -38,6 +38,7 @@ export async function getUserOrganization(): Promise<
     return {
       orgCode: org.code,
       orgName: org.name ?? org.code,
+      orgLogo: org.logo || undefined,
     };
   } catch (error) {
     // Log the error and return undefined
