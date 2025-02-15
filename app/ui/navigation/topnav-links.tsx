@@ -11,19 +11,27 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
 
-const links = [
-  { name: 'Home', href: '/dashboard', icon: HomeIcon },
-  {
-    name: 'Invoices',
-    href: '/invoices',
-    icon: DocumentDuplicateIcon,
-  },
-  { name: 'Customers', href: '/customers', icon: UserGroupIcon },
-  { name: 'Portal', href: '/portal', icon: WindowIcon },
-];
+interface TopNavLinksProps {
+  isAdmin: boolean;
+}
 
-export default function TopNavLinks() {
+export default function TopNavLinks({ isAdmin }: TopNavLinksProps) {
   const pathname = usePathname();
+
+  const links = [
+    { name: 'Home', href: '/dashboard', icon: HomeIcon },
+    {
+      name: 'Invoices',
+      href: '/invoices',
+      icon: DocumentDuplicateIcon,
+    },
+    { name: 'Customers', href: '/customers', icon: UserGroupIcon },
+  ];
+
+  if (isAdmin) {
+    links.push({ name: 'Portal', href: '/portal', icon: WindowIcon });
+  }
+
   return (
     <>
       {links.map((link) => {

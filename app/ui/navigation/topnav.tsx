@@ -8,8 +8,8 @@ import {
 } from '@heroicons/react/24/outline';
 import { LogoutLink } from '@kinde-oss/kinde-auth-nextjs/components';
 import { getUserInfo } from '@/app/lib/kinde-data';
-import TopNavLinks from '@/app/ui/navigation/topnav-links';
 import { getCurrentUserRole } from '@/app/lib/auth';
+import TopNavLinks from '@/app/ui/navigation/topnav-links';
 
 export default async function TopNav() {
   const userInfo = await getUserInfo();
@@ -28,7 +28,7 @@ export default async function TopNav() {
             <AcmeLogo />
           </div>
           <div className="flex items-center space-x-4">
-            <TopNavLinks />
+            <TopNavLinks isAdmin={isAdmin} />
           </div>
         </div>
         <div className="group relative">
