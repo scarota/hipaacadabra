@@ -7,14 +7,16 @@ import {
   CogIcon,
 } from '@heroicons/react/24/outline';
 import { LogoutLink } from '@kinde-oss/kinde-auth-nextjs/components';
-import { getUserInfo } from '@/app/lib/kinde-data';
+import { getUserInfo, getUserOrganization } from '@/app/lib/kinde-data';
 import { getCurrentUserRole } from '@/app/lib/auth';
 import TopNavLinks from '@/app/ui/navigation/topnav-links';
 
 export default async function TopNav() {
   const userInfo = await getUserInfo();
   const userRole = await getCurrentUserRole();
+  const organization = await getUserOrganization();
   const isAdmin = userRole === 'admin';
+  const hasOrg = !!organization?.orgCode;
 
   if (!userInfo) {
     return null;
@@ -27,9 +29,11 @@ export default async function TopNav() {
           <div className="mr-8">
             <AcmeLogo />
           </div>
-          <div className="flex items-center space-x-4">
-            <TopNavLinks isAdmin={isAdmin} />
-          </div>
+          {hasOrg && (
+            <div className="flex items-center space-x-4">
+              <TopNavLinks isAdmin={isAdmin} />
+            </div>
+          )}
         </div>
         <div className="group relative">
           <button className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">
