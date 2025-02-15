@@ -1,9 +1,13 @@
 import { formatDateToLocal } from '@/app/lib/utils';
 import type { KindeUser } from '@/app/lib/definitions';
+import Search from '@/app/ui/search';
 
 export default function UsersTable({ users }: { users: KindeUser[] }) {
   return (
     <div className="mt-6 flow-root">
+      <div className="mb-4">
+        <Search placeholder="Filter users by name, email, or role" />
+      </div>
       <div className="inline-block min-w-full align-middle">
         <div className="rounded-lg bg-white p-2 md:pt-0">
           <div className="md:hidden">

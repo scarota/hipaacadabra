@@ -6,8 +6,26 @@ export const metadata: Metadata = {
   title: 'Users',
 };
 
-export default async function UsersPage() {
+export default async function UsersPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{
+    query?: string;
+  }>;
+}) {
+  const params = await searchParams;
+  const query = params?.query || '';
   const users = await getOrganizationUsers();
+
+  const filteredUsers = users.filter((user) => {
+    const searchTerm = query.toLowerCase();
+    return (
+      user.firstName.toLowerCase().includes(searchTerm) ||
+      user.lastName.toLowerCase().includes(searchTerm) ||
+      user.email.toLowerCase().includes(searchTerm) ||
+      user.roles.some((role) => role.toLowerCase().includes(searchTerm))
+    );
+  });
 
   return (
     <div>
@@ -18,7 +36,7 @@ export default async function UsersPage() {
         </p>
       </div>
 
-      <UsersTable users={users} />
+      <UsersTable users={filteredUsers} />
     </div>
   );
 }
