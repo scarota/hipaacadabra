@@ -21,7 +21,6 @@ const links = [
     icon: DocumentDuplicateIcon,
   },
   { name: 'Customers', href: '/customers', icon: UserGroupIcon },
-  { name: 'Schema', href: '/schema', icon: CommandLineIcon },
   { name: 'Portal', href: '/portal', icon: WindowIcon },
 ];
 

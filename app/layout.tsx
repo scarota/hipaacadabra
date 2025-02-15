@@ -5,8 +5,8 @@ import { AuthProvider } from './AuthProvider';
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Acme',
-    default: 'Acme',
+    template: '%s | mybusiness',
+    default: 'mybusiness',
   },
   description: 'The official Next.js Course Dashboard, built with App Router.',
   metadataBase: new URL('https://next-learn-dashboard.vercel.sh'),

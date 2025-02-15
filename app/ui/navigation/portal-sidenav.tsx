@@ -3,11 +3,16 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
-import { SwatchIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
+import {
+  SwatchIcon,
+  GlobeAltIcon,
+  CodeBracketIcon,
+} from '@heroicons/react/24/outline';
 
 const links = [
   { name: 'Branding', href: '/portal/branding', icon: SwatchIcon },
   { name: 'Custom Domain', href: '/portal/domain', icon: GlobeAltIcon },
+  { name: 'Schema Config', href: '/portal/schema', icon: CodeBracketIcon },
 ];
 
 export default function PortalSideNav() {
