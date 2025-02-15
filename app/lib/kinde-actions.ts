@@ -97,14 +97,48 @@ export async function updateOrganization(
     };
   }
 
-  // Get the file from form data
+  // Get access token using client credentials
+  const tokenResponse = await fetch(
+    `${process.env.KINDE_DOMAIN}/oauth2/token`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        grant_type: 'client_credentials',
+        client_id: process.env.KINDE_MANAGEMENT_CLIENT_ID!,
+        client_secret: process.env.KINDE_MANAGEMENT_CLIENT_SECRET!,
+        audience: `${process.env.KINDE_DOMAIN}/api`,
+      }),
+    },
+  );
+
+  if (!tokenResponse.ok) {
+    return {
+      message: 'Authentication failed. Unable to update organization.',
+    };
+  }
+
+  const { access_token } = await tokenResponse.json();
+
+  // Get and validate the file from form data
   const file = formData.get('logo') as File;
+
   if (file && file.size > 0) {
-    console.log('File received:', {
-      name: file.name,
-      type: file.type,
-      size: file.size,
-    });
+    // Validate file size (500KB)
+    if (file.size > 512000) {
+      return {
+        message: 'Logo file is too large. Maximum size is 500KB.',
+      };
+    }
+
+    // Validate file type
+    if (!['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) {
+      return {
+        message: 'Invalid file type. Please upload a JPG, PNG, or GIF.',
+      };
+    }
   }
 
   const validatedFields = OrganizationFormSchema.safeParse({
@@ -122,14 +156,35 @@ export async function updateOrganization(
     init();
     const { organizationName } = validatedFields.data;
 
-    const payload = {
+    // Update organization name
+    await Organizations.updateOrganization({
       orgCode: org.orgCode,
       requestBody: {
         name: organizationName,
       },
-    };
+    });
 
-    await Organizations.updateOrganization(payload);
+    // If we have a logo, update it using the dedicated endpoint
+    if (file && file.size > 0) {
+      // Create a new FormData instance for the logo upload
+      const logoFormData = new FormData();
+      logoFormData.append('file', file);
+
+      const response = await fetch(
+        `${process.env.KINDE_ISSUER_URL}/api/v1/organizations/${org.orgCode}/logos/light`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
+          body: logoFormData,
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to upload logo');
+      }
+    }
 
     revalidatePath('/settings/general');
 
