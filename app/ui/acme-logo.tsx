@@ -1,17 +1,17 @@
-import { RocketLaunchIcon } from '@heroicons/react/24/outline';
-import { lusitana } from '@/app/ui/fonts';
-import clsx from 'clsx';
+import { getUserOrganization } from '@/app/lib/kinde-data';
 
-export default function AcmeLogo({ className }: { className?: string }) {
+export default async function AcmeLogo({ className }: { className?: string }) {
+  const org = await getUserOrganization();
+
   return (
-    <div
-      className={clsx(
-        `${lusitana.className} flex flex-row items-center leading-none`,
-        className,
+    <div className={`flex items-center ${className}`}>
+      {org?.orgLogo ? (
+        <img src={org.orgLogo} alt="Organization logo" className="h-8 w-auto" />
+      ) : (
+        <div className="flex items-center text-blue-600">
+          <span className="font-bold">Hipaacadabra</span>
+        </div>
       )}
-    >
-      <RocketLaunchIcon className="h-8 w-8 text-blue-600" />
-      <p className="text-xl font-semibold">Acme</p>
     </div>
   );
 }
