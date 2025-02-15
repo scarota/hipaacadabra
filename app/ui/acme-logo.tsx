@@ -9,7 +9,7 @@ export default async function AcmeLogo({ className }: { className?: string }) {
         <img src={org.orgLogo} alt="Organization logo" className="h-8 w-auto" />
       ) : (
         <div className="flex items-center text-blue-600">
-          <span className="font-bold">Hipaacadabra</span>
+          <span className="font-bold">{org?.orgName}</span>
         </div>
       )}
     </div>
