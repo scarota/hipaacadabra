@@ -1,13 +1,13 @@
 # Hipaacadabra
 
-Hipaacadabra is a modern, healthcare-agnostic Personal Health Record (PHR) platform designed specifically for retail healthcare providers. It empowers retail healthcare organizations to offer their patients a seamless, secure, and user-friendly way to manage their health information across different care settings.
+Hipaacadabra is a modern, retail-agnostic Personal Health Record (PHR) platform designed for healthcare providers. It empowers healthcare organizations to offer their patients a seamless, secure, and user-friendly way to manage their health information across different retail care settings.
 
 ## Overview
 
 Hipaacadabra bridges the gap between retail healthcare providers and their patients by providing:
 
-- **Healthcare Agnostic Integration**: Seamlessly connects with various healthcare systems and EHRs
-- **Retail-Focused Design**: Optimized for retail healthcare workflows and patient engagement
+- **Retail-Agnostic Integration**: Seamlessly connects with various retail healthcare systems and EHRs
+- **Retail-Optimized Design**: Optimized for retail healthcare workflows and patient engagement
 - **Patient-Centric PHR**: Comprehensive personal health record management
 - **White-Label Solution**: Customizable branding for healthcare organizations
 - **HIPAA Compliance**: Built with security and privacy at its core
