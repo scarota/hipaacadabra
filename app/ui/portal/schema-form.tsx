@@ -13,23 +13,71 @@ interface SchemaFormProps {
 
 const DATA_SECTIONS = [
   {
+    id: 'users',
+    name: 'User Mapping',
+    description: 'Map EHR patients to portal users',
+    fields: [
+      { name: 'ehrPatientId', label: 'EHR Patient ID', type: 'string', required: true },
+      { name: 'ehrMrn', label: 'Medical Record Number', type: 'string' },
+      { name: 'firstName', label: 'First Name', type: 'string', required: true },
+      { name: 'lastName', label: 'Last Name', type: 'string', required: true },
+      { name: 'dateOfBirth', label: 'Date of Birth', type: 'date', required: true },
+      { name: 'email', label: 'Email', type: 'string', required: true },
+      { name: 'phone', label: 'Phone', type: 'string' },
+      { name: 'address.street', label: 'Street Address', type: 'string' },
+      { name: 'address.city', label: 'City', type: 'string' },
+      { name: 'address.state', label: 'State', type: 'string' },
+      { name: 'address.zipCode', label: 'Zip Code', type: 'string' },
+    ],
+    endpoint: '/patients/{id}',
+    authMethods: ['email', 'mrn', 'dob']
+  },
+  {
     id: 'appointments',
     name: 'Appointments',
     description: 'Patient appointments and scheduling data',
-    fields: ['date', 'time', 'provider', 'location', 'status'],
+    fields: [
+      { name: 'id', label: 'Appointment ID', type: 'string', required: true },
+      { name: 'date', label: 'Date', type: 'date', required: true },
+      { name: 'time', label: 'Time', type: 'string', required: true },
+      { name: 'provider', label: 'Provider', type: 'string', required: true },
+      { name: 'location', label: 'Location', type: 'string', required: true },
+      { name: 'status', label: 'Status', type: 'string', required: true },
+      { name: 'type', label: 'Type', type: 'string' },
+      { name: 'notes', label: 'Notes', type: 'string' }
+    ],
+    endpoint: '/appointments'
   },
   {
     id: 'invoices',
     name: 'Invoices',
     description: 'Billing and payment information',
-    fields: ['amount', 'date', 'status', 'items', 'patient'],
+    fields: [
+      { name: 'id', label: 'Invoice ID', type: 'string', required: true },
+      { name: 'amount', label: 'Amount', type: 'number', required: true },
+      { name: 'date', label: 'Date', type: 'date', required: true },
+      { name: 'dueDate', label: 'Due Date', type: 'date' },
+      { name: 'status', label: 'Status', type: 'string', required: true },
+      { name: 'items', label: 'Line Items', type: 'array' },
+      { name: 'patientId', label: 'Patient ID', type: 'string', required: true }
+    ],
+    endpoint: '/invoices'
   },
   {
     id: 'officeHours',
     name: 'Office Hours',
     description: 'Provider availability and office hours',
-    fields: ['day', 'start', 'end', 'location', 'provider'],
-  },
+    fields: [
+      { name: 'locationId', label: 'Location ID', type: 'string', required: true },
+      { name: 'name', label: 'Location Name', type: 'string', required: true },
+      { name: 'hours', label: 'Hours', type: 'array', required: true },
+      { name: 'providers', label: 'Providers', type: 'array' },
+      { name: 'address', label: 'Address', type: 'object', required: true },
+      { name: 'phone', label: 'Phone', type: 'string', required: true },
+      { name: 'email', label: 'Email', type: 'string' }
+    ],
+    endpoint: '/locations'
+  }
 ];
 
 export default function SchemaForm({ organization }: SchemaFormProps) {
@@ -110,11 +158,10 @@ export default function SchemaForm({ organization }: SchemaFormProps) {
             {DATA_SECTIONS.map((section) => (
               <div
                 key={section.id}
-                className={`cursor-pointer rounded-md border p-4 transition-colors ${
-                  selectedSection === section.id
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
+                className={`cursor-pointer rounded-md border p-4 transition-colors ${selectedSection === section.id
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-gray-200 hover:border-gray-300'
+                  }`}
                 onClick={() => setSelectedSection(section.id)}
               >
                 <h4 className="text-sm font-medium text-gray-900">
@@ -147,7 +194,7 @@ export default function SchemaForm({ organization }: SchemaFormProps) {
                         id={`${selectedSection}-endpoint`}
                         name={`${selectedSection}-endpoint`}
                         className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        placeholder="/api/v1/appointments"
+                        placeholder={DATA_SECTIONS.find(s => s.id === selectedSection)?.endpoint || '/api/v1/endpoint'}
                       />
                     </div>
                     <p className="mt-1 text-xs text-gray-500">
@@ -163,31 +210,42 @@ export default function SchemaForm({ organization }: SchemaFormProps) {
                       Response Field Mapping
                     </h4>
                     <div className="space-y-4">
-                      {DATA_SECTIONS.find(
-                        (s) => s.id === selectedSection,
-                      )?.fields.map((field) => (
-                        <div key={field}>
+                      {DATA_SECTIONS.find(s => s.id === selectedSection)?.fields.map((field) => (
+                        <div key={field.name}>
                           <label
-                            htmlFor={`${selectedSection}-${field}`}
-                            className="block text-sm font-medium text-gray-700"
+                            htmlFor={`${selectedSection}-${field.name}`}
+                            className="flex items-center text-sm font-medium text-gray-700"
                           >
-                            {field.charAt(0).toUpperCase() + field.slice(1)}
+                            {field.label}
+                            {field.required && (
+                              <span className="ml-1 text-red-500">*</span>
+                            )}
                           </label>
                           <div className="mt-1 flex gap-x-3">
                             <input
                               type="text"
-                              id={`${selectedSection}-${field}`}
-                              name={`${selectedSection}-${field}`}
+                              id={`${selectedSection}-${field.name}`}
+                              name={`${selectedSection}-${field.name}`}
                               className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                              placeholder={`response.data.${field}`}
+                              placeholder={`response.data.${field.name}`}
                             />
-                            <select className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                            <select
+                              className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              defaultValue={field.type}
+                            >
                               <option value="string">String</option>
                               <option value="number">Number</option>
                               <option value="date">Date</option>
                               <option value="boolean">Boolean</option>
+                              <option value="array">Array</option>
+                              <option value="object">Object</option>
                             </select>
                           </div>
+                          {field.type === 'array' && (
+                            <p className="mt-1 text-xs text-gray-500">
+                              Use JSONPath syntax for array mapping (e.g., items[*].value)
+                            </p>
+                          )}
                         </div>
                       ))}
                     </div>
