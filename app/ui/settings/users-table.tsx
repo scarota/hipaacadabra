@@ -2,7 +2,12 @@ import { formatDateToLocal } from '@/app/lib/utils';
 import type { KindeUser } from '@/app/lib/definitions';
 import Search from '@/app/ui/search';
 
-export default function UsersTable({ users }: { users: KindeUser[] }) {
+interface UsersTableProps {
+  users: KindeUser[];
+  currentUserEmail?: string | null;
+}
+
+export default function UsersTable({ users, currentUserEmail }: UsersTableProps) {
   return (
     <div className="mt-6 flow-root">
       <div className="mb-4">
@@ -21,6 +26,9 @@ export default function UsersTable({ users }: { users: KindeUser[] }) {
                     <div className="mb-2 flex items-center">
                       <p className="font-medium text-gray-900">
                         {user.firstName} {user.lastName}
+                        {user.email === currentUserEmail && (
+                          <span className="ml-2 text-sm text-gray-500">(You)</span>
+                        )}
                       </p>
                     </div>
                     <p className="text-sm text-gray-500">{user.email}</p>
@@ -74,6 +82,9 @@ export default function UsersTable({ users }: { users: KindeUser[] }) {
                     <div className="flex items-center gap-3">
                       <p>
                         {user.firstName} {user.lastName}
+                        {user.email === currentUserEmail && (
+                          <span className="ml-2 text-sm text-gray-500">(You)</span>
+                        )}
                       </p>
                     </div>
                   </td>

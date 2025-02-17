@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { getOrganizationUsers } from '@/app/lib/kinde-data';
+import { getOrganizationUsers, getUserInfo } from '@/app/lib/kinde-data';
 import UsersTable from '@/app/ui/settings/users-table';
 
 export const metadata: Metadata = {
@@ -16,6 +16,7 @@ export default async function UsersPage({
   const params = await searchParams;
   const query = params?.query || '';
   const users = await getOrganizationUsers();
+  const currentUser = await getUserInfo();
 
   const filteredUsers = users.filter((user) => {
     const searchTerm = query.toLowerCase();
@@ -36,7 +37,7 @@ export default async function UsersPage({
         </p>
       </div>
 
-      <UsersTable users={filteredUsers} />
+      <UsersTable users={filteredUsers} currentUserEmail={currentUser?.email} />
     </div>
   );
 }
