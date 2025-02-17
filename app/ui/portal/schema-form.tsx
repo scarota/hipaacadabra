@@ -17,11 +17,26 @@ const DATA_SECTIONS = [
     name: 'User Mapping',
     description: 'Map EHR patients to portal users',
     fields: [
-      { name: 'ehrPatientId', label: 'EHR Patient ID', type: 'string', required: true },
+      {
+        name: 'ehrPatientId',
+        label: 'EHR Patient ID',
+        type: 'string',
+        required: true,
+      },
       { name: 'ehrMrn', label: 'Medical Record Number', type: 'string' },
-      { name: 'firstName', label: 'First Name', type: 'string', required: true },
+      {
+        name: 'firstName',
+        label: 'First Name',
+        type: 'string',
+        required: true,
+      },
       { name: 'lastName', label: 'Last Name', type: 'string', required: true },
-      { name: 'dateOfBirth', label: 'Date of Birth', type: 'date', required: true },
+      {
+        name: 'dateOfBirth',
+        label: 'Date of Birth',
+        type: 'date',
+        required: true,
+      },
       { name: 'email', label: 'Email', type: 'string', required: true },
       { name: 'phone', label: 'Phone', type: 'string' },
       { name: 'address.street', label: 'Street Address', type: 'string' },
@@ -30,7 +45,7 @@ const DATA_SECTIONS = [
       { name: 'address.zipCode', label: 'Zip Code', type: 'string' },
     ],
     endpoint: '/patients/{id}',
-    authMethods: ['email', 'mrn', 'dob']
+    authMethods: ['email', 'mrn', 'dob'],
   },
   {
     id: 'appointments',
@@ -44,9 +59,9 @@ const DATA_SECTIONS = [
       { name: 'location', label: 'Location', type: 'string', required: true },
       { name: 'status', label: 'Status', type: 'string', required: true },
       { name: 'type', label: 'Type', type: 'string' },
-      { name: 'notes', label: 'Notes', type: 'string' }
+      { name: 'notes', label: 'Notes', type: 'string' },
     ],
-    endpoint: '/appointments'
+    endpoint: '/appointments',
   },
   {
     id: 'invoices',
@@ -59,25 +74,35 @@ const DATA_SECTIONS = [
       { name: 'dueDate', label: 'Due Date', type: 'date' },
       { name: 'status', label: 'Status', type: 'string', required: true },
       { name: 'items', label: 'Line Items', type: 'array' },
-      { name: 'patientId', label: 'Patient ID', type: 'string', required: true }
+      {
+        name: 'patientId',
+        label: 'Patient ID',
+        type: 'string',
+        required: true,
+      },
     ],
-    endpoint: '/invoices'
+    endpoint: '/invoices',
   },
   {
     id: 'officeHours',
     name: 'Office Hours',
     description: 'Provider availability and office hours',
     fields: [
-      { name: 'locationId', label: 'Location ID', type: 'string', required: true },
+      {
+        name: 'locationId',
+        label: 'Location ID',
+        type: 'string',
+        required: true,
+      },
       { name: 'name', label: 'Location Name', type: 'string', required: true },
       { name: 'hours', label: 'Hours', type: 'array', required: true },
       { name: 'providers', label: 'Providers', type: 'array' },
       { name: 'address', label: 'Address', type: 'object', required: true },
       { name: 'phone', label: 'Phone', type: 'string', required: true },
-      { name: 'email', label: 'Email', type: 'string' }
+      { name: 'email', label: 'Email', type: 'string' },
     ],
-    endpoint: '/locations'
-  }
+    endpoint: '/locations',
+  },
 ];
 
 export default function SchemaForm({ organization }: SchemaFormProps) {
@@ -158,10 +183,11 @@ export default function SchemaForm({ organization }: SchemaFormProps) {
             {DATA_SECTIONS.map((section) => (
               <div
                 key={section.id}
-                className={`cursor-pointer rounded-md border p-4 transition-colors ${selectedSection === section.id
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300'
-                  }`}
+                className={`cursor-pointer rounded-md border p-4 transition-colors ${
+                  selectedSection === section.id
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
                 onClick={() => setSelectedSection(section.id)}
               >
                 <h4 className="text-sm font-medium text-gray-900">
@@ -194,7 +220,10 @@ export default function SchemaForm({ organization }: SchemaFormProps) {
                         id={`${selectedSection}-endpoint`}
                         name={`${selectedSection}-endpoint`}
                         className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        placeholder={DATA_SECTIONS.find(s => s.id === selectedSection)?.endpoint || '/api/v1/endpoint'}
+                        placeholder={
+                          DATA_SECTIONS.find((s) => s.id === selectedSection)
+                            ?.endpoint || '/api/v1/endpoint'
+                        }
                       />
                     </div>
                     <p className="mt-1 text-xs text-gray-500">
@@ -210,7 +239,9 @@ export default function SchemaForm({ organization }: SchemaFormProps) {
                       Response Field Mapping
                     </h4>
                     <div className="space-y-4">
-                      {DATA_SECTIONS.find(s => s.id === selectedSection)?.fields.map((field) => (
+                      {DATA_SECTIONS.find(
+                        (s) => s.id === selectedSection,
+                      )?.fields.map((field) => (
                         <div key={field.name}>
                           <label
                             htmlFor={`${selectedSection}-${field.name}`}
@@ -243,7 +274,8 @@ export default function SchemaForm({ organization }: SchemaFormProps) {
                           </div>
                           {field.type === 'array' && (
                             <p className="mt-1 text-xs text-gray-500">
-                              Use JSONPath syntax for array mapping (e.g., items[*].value)
+                              Use JSONPath syntax for array mapping (e.g.,
+                              items[*].value)
                             </p>
                           )}
                         </div>

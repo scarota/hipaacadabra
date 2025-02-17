@@ -17,7 +17,9 @@ export default function PortalPage() {
 
       <div className="flex-1 overflow-hidden rounded-lg border border-gray-200 bg-white shadow">
         <div className="flex h-10 items-center justify-between border-b bg-gray-50 px-4">
-          <span className="text-sm font-medium text-gray-600">Patient Portal</span>
+          <span className="text-sm font-medium text-gray-600">
+            Patient Portal
+          </span>
           <div className="flex items-center space-x-4">
             <a
               href="/patient"

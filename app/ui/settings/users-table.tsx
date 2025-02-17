@@ -7,7 +7,10 @@ interface UsersTableProps {
   currentUserEmail?: string | null;
 }
 
-export default function UsersTable({ users, currentUserEmail }: UsersTableProps) {
+export default function UsersTable({
+  users,
+  currentUserEmail,
+}: UsersTableProps) {
   return (
     <div className="mt-6 flow-root">
       <div className="mb-4">
@@ -27,7 +30,9 @@ export default function UsersTable({ users, currentUserEmail }: UsersTableProps)
                       <p className="font-medium text-gray-900">
                         {user.firstName} {user.lastName}
                         {user.email === currentUserEmail && (
-                          <span className="ml-2 text-sm text-gray-500">(You)</span>
+                          <span className="ml-2 text-sm text-gray-500">
+                            (You)
+                          </span>
                         )}
                       </p>
                     </div>
@@ -83,7 +88,9 @@ export default function UsersTable({ users, currentUserEmail }: UsersTableProps)
                       <p>
                         {user.firstName} {user.lastName}
                         {user.email === currentUserEmail && (
-                          <span className="ml-2 text-sm text-gray-500">(You)</span>
+                          <span className="ml-2 text-sm text-gray-500">
+                            (You)
+                          </span>
                         )}
                       </p>
                     </div>
