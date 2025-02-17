@@ -12,10 +12,10 @@ import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
 
 interface TopNavLinksProps {
-  isAdmin: boolean;
+  isOwner: boolean;
 }
 
-export default function TopNavLinks({ isAdmin }: TopNavLinksProps) {
+export default function TopNavLinks({ isOwner }: TopNavLinksProps) {
   const pathname = usePathname();
 
   const links = [
@@ -26,11 +26,8 @@ export default function TopNavLinks({ isAdmin }: TopNavLinksProps) {
       icon: DocumentDuplicateIcon,
     },
     { name: 'Customers', href: '/customers', icon: UserGroupIcon },
+    { name: 'Portal', href: '/portal', icon: WindowIcon },
   ];
-
-  if (isAdmin) {
-    links.push({ name: 'Portal', href: '/portal', icon: WindowIcon });
-  }
 
   return (
     <>

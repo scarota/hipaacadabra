@@ -6,7 +6,7 @@ export default async function Layout({
 }: {
   children: React.ReactNode;
 }) {
-  await protectRoute(['admin']);
+  await protectRoute(['owner']);
 
   return (
     <div className="-m-8 flex min-h-screen">

@@ -15,7 +15,7 @@ export default async function TopNav() {
   const userInfo = await getUserInfo();
   const userRole = await getCurrentUserRole();
   const organization = await getUserOrganization();
-  const isAdmin = userRole === 'admin';
+  const isOwner = userRole === 'owner';
   const hasOrg = !!organization?.orgCode;
 
   if (!userInfo) {
@@ -31,7 +31,7 @@ export default async function TopNav() {
           </div>
           {hasOrg && (
             <div className="flex items-center space-x-4">
-              <TopNavLinks isAdmin={isAdmin} />
+              <TopNavLinks isOwner={isOwner} />
             </div>
           )}
         </div>
@@ -49,7 +49,7 @@ export default async function TopNav() {
               <UserIcon className="mr-3 h-4 w-4" />
               Profile
             </Link>
-            {isAdmin && (
+            {isOwner && (
               <Link
                 href="/settings/general"
                 className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"

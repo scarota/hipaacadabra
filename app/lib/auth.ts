@@ -15,14 +15,14 @@ export async function getCurrentUserRole() {
   const currentUser = orgUsers.find((orgUser) => orgUser.email === user.email);
 
   if (!currentUser?.roles.length) {
-    return 'standard';
-  }
-
-  if (currentUser.roles.includes('admin')) {
     return 'admin';
   }
 
-  return 'standard';
+  if (currentUser.roles.includes('owner')) {
+    return 'owner';
+  }
+
+  return 'admin';
 }
 
 export async function protectRoute(allowedRoles: string[]) {
