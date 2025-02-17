@@ -25,15 +25,3 @@ model invoices {
   date       DateTime  @db.Date
   customers  customers @relation(fields: [customerId], references: [id])
 }
-
-model revenue {
-  month   String @unique @db.String(4)
-  revenue Int
-}
-
-model users {
-  id       String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name     String @db.String(255)
-  email    String @unique
-  password String
-}
