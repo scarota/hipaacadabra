@@ -12,9 +12,19 @@ interface ApiKeyConfigProps {
     orgCode: string;
     orgName: string;
   };
+  initialConfig?: {
+    id: string;
+    org_code: string;
+    api_key: string;
+    base_url: string;
+    is_verified: boolean;
+    last_verified: Date | null;
+    created_at: Date;
+    updated_at: Date;
+  } | null;
 }
 
-export default function ApiKeyConfig({ organization }: ApiKeyConfigProps) {
+export default function ApiKeyConfig({ organization, initialConfig }: ApiKeyConfigProps) {
   const [showApiKey, setShowApiKey] = useState(false);
   const initialState: State = { message: null, errors: {} };
   const [state, dispatch] = useActionState(updatePortalApiConfig, initialState);
@@ -40,6 +50,7 @@ export default function ApiKeyConfig({ organization }: ApiKeyConfigProps) {
                 type={showApiKey ? 'text' : 'password'}
                 id="apiKey"
                 name="apiKey"
+                defaultValue={initialConfig?.api_key}
                 className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 placeholder="Enter your API key"
                 aria-describedby="apiKey-error"
@@ -75,6 +86,7 @@ export default function ApiKeyConfig({ organization }: ApiKeyConfigProps) {
             type="text"
             id="baseUrl"
             name="baseUrl"
+            defaultValue={initialConfig?.base_url}
             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             placeholder="https://api.yourprovider.com/v1"
             aria-describedby="baseUrl-error"
@@ -85,6 +97,19 @@ export default function ApiKeyConfig({ organization }: ApiKeyConfigProps) {
             </p>
           )}
         </div>
+
+        {initialConfig?.is_verified && (
+          <div className="rounded-md bg-green-50 p-4">
+            <p className="text-sm text-green-700">
+              API configuration verified
+              {initialConfig.last_verified && (
+                <span className="ml-1">
+                  on {new Date(initialConfig.last_verified).toLocaleDateString()}
+                </span>
+              )}
+            </p>
+          </div>
+        )}
 
         {state.message && !state.errors && (
           <div className="rounded-md bg-green-50 p-4">

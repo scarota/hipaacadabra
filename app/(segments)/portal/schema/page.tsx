@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import SchemaForm from '@/app/ui/portal/schema-form';
 import { getUserOrganization } from '@/app/lib/kinde-data';
+import { getPortalApiConfig } from '@/app/lib/portal-data';
 
 export const metadata: Metadata = {
   title: 'Schema Configuration',
@@ -13,6 +14,8 @@ export default async function SchemaPage() {
     return null;
   }
 
+  const apiConfig = await getPortalApiConfig();
+
   return (
     <div>
       <div className="mb-8">
@@ -24,7 +27,7 @@ export default async function SchemaPage() {
         </p>
       </div>
 
-      <SchemaForm organization={organization} />
+      <SchemaForm organization={organization} initialApiConfig={apiConfig} />
     </div>
   );
 }
