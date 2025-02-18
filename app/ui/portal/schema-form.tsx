@@ -127,10 +127,11 @@ export default function SchemaForm({ organization }: SchemaFormProps) {
             {DATA_SECTIONS.map((section) => (
               <div
                 key={section.id}
-                className={`cursor-pointer rounded-md border p-4 transition-colors ${selectedSection === section.id
+                className={`cursor-pointer rounded-md border p-4 transition-colors ${
+                  selectedSection === section.id
                     ? 'border-blue-500 bg-blue-50'
                     : 'border-gray-200 hover:border-gray-300'
-                  }`}
+                }`}
                 onClick={() => setSelectedSection(section.id)}
               >
                 <h4 className="text-sm font-medium text-gray-900">

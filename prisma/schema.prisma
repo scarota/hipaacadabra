@@ -25,3 +25,14 @@ model invoices {
   date       DateTime  @db.Date
   customers  customers @relation(fields: [customerId], references: [id])
 }
+
+model portal_api_configs {
+  id            String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  org_code      String    @unique @db.String(20)
+  api_key       String    @db.String(255) // Encrypted
+  base_url      String    @db.String(255)
+  is_verified   Boolean   @default(false)
+  last_verified DateTime?
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+}
