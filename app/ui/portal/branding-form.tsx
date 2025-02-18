@@ -1,9 +1,6 @@
 'use client';
 
-import { useActionState } from 'react';
 import { Button } from '@/app/ui/button';
-import { updateBranding } from '@/app/lib/portal-actions';
-import type { State } from '@/app/lib/portal-actions';
 
 interface BrandingFormProps {
   organization: {
@@ -12,13 +9,10 @@ interface BrandingFormProps {
   };
 }
 
-export default function BrandingForm({}: BrandingFormProps) {
-  const initialState: State = { message: null, errors: {} };
-  const [state, dispatch] = useActionState(updateBranding, initialState);
-
+export default function BrandingForm({ organization }: BrandingFormProps) {
   return (
     <div className="max-w-2xl rounded-lg bg-white p-6 shadow">
-      <form action={dispatch} className="space-y-6">
+      <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
         <div className="grid grid-cols-1 gap-6">
           {/* Primary Color */}
           <div>
@@ -86,18 +80,6 @@ export default function BrandingForm({}: BrandingFormProps) {
             </select>
           </div>
         </div>
-
-        {state.message && (
-          <div
-            className={`rounded-md p-4 ${
-              state.errors
-                ? 'bg-red-50 text-red-700'
-                : 'bg-green-50 text-green-700'
-            }`}
-          >
-            <p className="text-sm">{state.message}</p>
-          </div>
-        )}
 
         <div className="flex justify-end">
           <Button type="submit">Save branding</Button>

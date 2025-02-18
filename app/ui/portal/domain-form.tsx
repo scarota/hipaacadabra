@@ -1,9 +1,6 @@
 'use client';
 
-import { useActionState } from 'react';
 import { Button } from '@/app/ui/button';
-import { updateDomain } from '@/app/lib/portal-actions';
-import type { State } from '@/app/lib/portal-actions';
 
 interface DomainFormProps {
   organization: {
@@ -13,13 +10,10 @@ interface DomainFormProps {
 }
 
 export default function DomainForm({ organization }: DomainFormProps) {
-  const initialState: State = { message: null, errors: {} };
-  const [state, dispatch] = useActionState(updateDomain, initialState);
-
   return (
     <div className="max-w-2xl space-y-6">
       <div className="rounded-lg bg-white p-6 shadow">
-        <form action={dispatch} className="space-y-6">
+        <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
           <div>
             <label
               htmlFor="domain"
@@ -40,18 +34,6 @@ export default function DomainForm({ organization }: DomainFormProps) {
               Enter the domain you want to use for your customer portal
             </p>
           </div>
-
-          {state.message && (
-            <div
-              className={`rounded-md p-4 ${
-                state.errors
-                  ? 'bg-red-50 text-red-700'
-                  : 'bg-green-50 text-green-700'
-              }`}
-            >
-              <p className="text-sm">{state.message}</p>
-            </div>
-          )}
 
           <div className="flex justify-end">
             <Button type="submit">Save domain</Button>

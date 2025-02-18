@@ -36,50 +36,6 @@ export async function getPortalApiConfig() {
   }
 }
 
-export async function updatePortalApiConfig({
-  apiKey,
-  baseUrl,
-}: {
-  apiKey: string;
-  baseUrl: string;
-}) {
-  const prisma = new PrismaClient();
-  const org = await getUserOrganization();
-
-  if (!org?.orgCode) {
-    throw new Error('Organization not found');
-  }
-
-  try {
-    // Encrypt the API key before storing
-    const encryptedApiKey = await encrypt(apiKey);
-
-    const config = await prisma.portal_api_configs.upsert({
-      where: {
-        org_code: org.orgCode,
-      },
-      update: {
-        api_key: encryptedApiKey,
-        base_url: baseUrl,
-        is_verified: false, // Reset verification status on update
-      },
-      create: {
-        org_code: org.orgCode,
-        api_key: encryptedApiKey,
-        base_url: baseUrl,
-        is_verified: false,
-      },
-    });
-
-    return config;
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to update portal API configuration.');
-  } finally {
-    await prisma.$disconnect();
-  }
-}
-
 export async function verifyPortalApiConfig() {
   const prisma = new PrismaClient();
   const org = await getUserOrganization();

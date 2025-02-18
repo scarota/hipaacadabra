@@ -2,98 +2,86 @@
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import { PrismaClient } from '@prisma/client';
+import { getUserOrganization } from '@/app/lib/kinde-data';
+import { encrypt } from '@/app/lib/encryption';
 
 export type State = {
+  message: string | null;
   errors?: {
-    primaryColor?: string[];
-    font?: string[];
-    domain?: string[];
+    apiKey?: string[];
+    baseUrl?: string[];
   };
-  message?: string | null;
 };
 
-const BrandingFormSchema = z.object({
-  primaryColor: z.string().regex(/^#[0-9A-F]{6}$/i, 'Invalid color format'),
-  font: z.enum(['inter', 'roboto', 'opensans', 'lato']),
+const ApiConfigSchema = z.object({
+  apiKey: z.string().min(1, 'API Key is required'),
+  baseUrl: z.string().url('Invalid URL format'),
 });
 
-const DomainFormSchema = z.object({
-  domain: z
-    .string()
-    .min(1, 'Domain is required')
-    .regex(
-      /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/,
-      'Invalid domain format',
-    ),
-});
-
-export async function updateBranding(
+export async function updatePortalApiConfig(
   prevState: State,
   formData: FormData,
 ): Promise<State> {
-  const validatedFields = BrandingFormSchema.safeParse({
-    primaryColor: formData.get('primaryColor'),
-    font: formData.get('font'),
+  const validatedFields = ApiConfigSchema.safeParse({
+    apiKey: formData.get('apiKey'),
+    baseUrl: formData.get('baseUrl'),
   });
 
   if (!validatedFields.success) {
     return {
+      message: 'Invalid form data. Please check your inputs.',
       errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Invalid form data. Please check the fields below.',
+    };
+  }
+
+  const prisma = new PrismaClient();
+  const org = await getUserOrganization();
+
+  if (!org?.orgCode) {
+    return {
+      message: 'Organization not found',
+      errors: {
+        apiKey: ['Unable to save configuration: Organization not found'],
+      },
     };
   }
 
   try {
-    // TODO: Implement branding update logic
-    // This would typically involve:
-    // 1. Saving to database
-    // 2. Updating CDN assets
-    // 3. Regenerating CSS
+    // Encrypt the API key before storing
+    const encryptedApiKey = await encrypt(validatedFields.data.apiKey);
 
-    revalidatePath('/portal/branding');
+    await prisma.portal_api_configs.upsert({
+      where: {
+        org_code: org.orgCode,
+      },
+      update: {
+        api_key: encryptedApiKey,
+        base_url: validatedFields.data.baseUrl,
+        is_verified: false, // Reset verification status on update
+      },
+      create: {
+        org_code: org.orgCode,
+        api_key: encryptedApiKey,
+        base_url: validatedFields.data.baseUrl,
+        is_verified: false,
+      },
+    });
+
+    revalidatePath('/portal/schema');
 
     return {
-      message: 'Branding updated successfully!',
+      message: 'API configuration updated successfully',
     };
   } catch (error) {
+    console.error('Database Error:', error);
     return {
-      message: 'Failed to update branding. Please try again.',
+      message: 'Failed to update API configuration',
+      errors: {
+        apiKey: ['Failed to save API configuration'],
+      },
     };
-  }
-}
-
-export async function updateDomain(
-  prevState: State,
-  formData: FormData,
-): Promise<State> {
-  const validatedFields = DomainFormSchema.safeParse({
-    domain: formData.get('domain'),
-  });
-
-  if (!validatedFields.success) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Invalid form data. Please check the fields below.',
-    };
-  }
-
-  try {
-    // TODO: Implement domain update logic
-    // This would typically involve:
-    // 1. Validating domain ownership
-    // 2. Setting up SSL certificate
-    // 3. Updating DNS records
-    // 4. Saving to database
-
-    revalidatePath('/portal/domain');
-
-    return {
-      message:
-        'Domain configuration initiated. Please add the DNS records to verify ownership.',
-    };
-  } catch (error) {
-    return {
-      message: 'Failed to update domain. Please try again.',
-    };
+  } finally {
+    await prisma.$disconnect();
   }
 }
