@@ -111,7 +111,7 @@ export default function SchemaForm({ organization }: SchemaFormProps) {
   return (
     <div className="space-y-6">
       {/* API Key Configuration */}
-      <ApiKeyConfig />
+      <ApiKeyConfig organization={organization} />
 
       {/* Data Mapping */}
       <div className="rounded-lg bg-white p-6 shadow">

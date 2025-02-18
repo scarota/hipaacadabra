@@ -1,11 +1,23 @@
 'use client';
 
 import { useState } from 'react';
+import { useActionState } from 'react';
 import { Button } from '@/app/ui/button';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { updatePortalApiConfig } from '@/app/lib/portal-actions';
+import type { State } from '@/app/lib/portal-actions';
 
-export default function ApiKeyConfig() {
+interface ApiKeyConfigProps {
+  organization: {
+    orgCode: string;
+    orgName: string;
+  };
+}
+
+export default function ApiKeyConfig({ organization }: ApiKeyConfigProps) {
   const [showApiKey, setShowApiKey] = useState(false);
+  const initialState: State = { message: null, errors: {} };
+  const [state, dispatch] = useActionState(updatePortalApiConfig, initialState);
 
   return (
     <div className="rounded-lg bg-white p-6 shadow">
@@ -14,7 +26,7 @@ export default function ApiKeyConfig() {
         Configure your API endpoint and authentication
       </p>
 
-      <div className="mt-6 grid grid-cols-1 gap-6">
+      <form action={dispatch} className="mt-6 grid grid-cols-1 gap-6">
         <div>
           <label
             htmlFor="apiKey"
@@ -30,6 +42,7 @@ export default function ApiKeyConfig() {
                 name="apiKey"
                 className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 placeholder="Enter your API key"
+                aria-describedby="apiKey-error"
               />
               <button
                 type="button"
@@ -43,8 +56,12 @@ export default function ApiKeyConfig() {
                 )}
               </button>
             </div>
-            <Button type="button">Verify</Button>
           </div>
+          {state.errors?.apiKey && (
+            <p className="mt-2 text-sm text-red-600" id="apiKey-error">
+              {state.errors.apiKey.join(', ')}
+            </p>
+          )}
         </div>
 
         <div>
@@ -60,9 +77,25 @@ export default function ApiKeyConfig() {
             name="baseUrl"
             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             placeholder="https://api.yourprovider.com/v1"
+            aria-describedby="baseUrl-error"
           />
+          {state.errors?.baseUrl && (
+            <p className="mt-2 text-sm text-red-600" id="baseUrl-error">
+              {state.errors.baseUrl.join(', ')}
+            </p>
+          )}
         </div>
-      </div>
+
+        {state.message && !state.errors && (
+          <div className="rounded-md bg-green-50 p-4">
+            <p className="text-sm text-green-700">{state.message}</p>
+          </div>
+        )}
+
+        <div className="flex justify-end">
+          <Button type="submit">Save configuration</Button>
+        </div>
+      </form>
     </div>
   );
 }
