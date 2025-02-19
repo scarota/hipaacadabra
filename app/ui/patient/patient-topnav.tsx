@@ -19,7 +19,7 @@ const links = [
   { name: 'Profile', href: '/patient/profile', icon: UserIcon },
 ];
 
-export default function PatientNav() {
+export default function PatientTopNav() {
   const pathname = usePathname();
 
   return (

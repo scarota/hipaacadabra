@@ -20,12 +20,13 @@ export default function TopNavLinks({ isOwner }: TopNavLinksProps) {
 
   const links = [
     { name: 'Home', href: '/dashboard', icon: HomeIcon },
-    {
-      name: 'Invoices',
-      href: '/invoices',
-      icon: DocumentDuplicateIcon,
-    },
-    { name: 'Customers', href: '/customers', icon: UserGroupIcon },
+    // Temporarily hidden
+    // {
+    //   name: 'Invoices',
+    //   href: '/invoices',
+    //   icon: DocumentDuplicateIcon,
+    // },
+    // { name: 'Customers', href: '/customers', icon: UserGroupIcon },
     { name: 'Portal', href: '/portal', icon: WindowIcon },
   ];
 

@@ -1,4 +1,4 @@
-import PatientNav from '@/app/ui/patient/nav';
+import PatientTopNav from '@/app/ui/patient/patient-topnav';
 
 export default function PatientPortalLayout({
   children,
@@ -7,7 +7,7 @@ export default function PatientPortalLayout({
 }) {
   return (
     <div className="flex min-h-screen flex-col">
-      <PatientNav />
+      <PatientTopNav />
       <main className="flex-1 bg-gray-50">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           {children}
