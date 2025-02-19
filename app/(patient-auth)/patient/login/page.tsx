@@ -1,9 +1,25 @@
 'use client';
 
+import { useState } from 'react';
 import { Button } from '@/app/ui/button';
-import Link from 'next/link';
 
 export default function PatientLoginPage() {
+  const [email, setEmail] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [step, setStep] = useState<'email' | 'verify'>('email');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleRequestCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    // TODO: Implement verification code logic
+  };
+
+  const handleVerifyCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    // TODO: Implement verification logic
+  };
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -18,80 +34,96 @@ export default function PatientLoginPage() {
         </div>
 
         <div className="mt-8 bg-white px-4 py-8 shadow sm:rounded-lg sm:px-10">
-          <form className="space-y-6" action="#" method="POST">
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Email address
-              </label>
-              <div className="mt-1">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Password
-              </label>
-              <div className="mt-1">
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
+          {step === 'email' ? (
+            <form className="space-y-6" onSubmit={handleRequestCode}>
+              <div>
                 <label
-                  htmlFor="remember-me"
-                  className="ml-2 block text-sm text-gray-900"
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700"
                 >
-                  Remember me
+                  Email address
                 </label>
+                <div className="mt-1">
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
               </div>
 
-              <div className="text-sm">
-                <Link
-                  href="/patient/forgot-password"
-                  className="font-medium text-blue-600 hover:text-blue-500"
+              {error && (
+                <div className="rounded-md bg-red-50 p-4">
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
+              )}
+
+              <div>
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                 >
-                  Forgot your password?
-                </Link>
+                  {isLoading ? 'Sending code...' : 'Send verification code'}
+                </Button>
               </div>
-            </div>
+            </form>
+          ) : (
+            <form className="space-y-6" onSubmit={handleVerifyCode}>
+              <div>
+                <label
+                  htmlFor="code"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Verification Code
+                </label>
+                <div className="mt-1">
+                  <input
+                    id="code"
+                    name="code"
+                    type="text"
+                    required
+                    value={verificationCode}
+                    onChange={(e) => setVerificationCode(e.target.value)}
+                    className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    placeholder="Enter the code sent to your email"
+                  />
+                </div>
+                <p className="mt-1 text-sm text-gray-500">
+                  Check the browser console for the code (demo only)
+                </p>
+              </div>
 
-            <div>
-              <Button
-                type="submit"
-                className="flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-              >
-                Sign in
-              </Button>
-            </div>
-          </form>
+              {error && (
+                <div className="rounded-md bg-red-50 p-4">
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
+              )}
+
+              <div className="flex flex-col space-y-3">
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                >
+                  {isLoading ? 'Verifying...' : 'Verify code'}
+                </Button>
+
+                <button
+                  type="button"
+                  onClick={() => setStep('email')}
+                  className="text-sm text-blue-600 hover:text-blue-500"
+                >
+                  Use a different email
+                </button>
+              </div>
+            </form>
+          )}
         </div>
       </div>
     </div>

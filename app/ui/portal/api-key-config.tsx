@@ -24,7 +24,10 @@ interface ApiKeyConfigProps {
   } | null;
 }
 
-export default function ApiKeyConfig({ organization, initialConfig }: ApiKeyConfigProps) {
+export default function ApiKeyConfig({
+  organization,
+  initialConfig,
+}: ApiKeyConfigProps) {
   const [showApiKey, setShowApiKey] = useState(false);
   const initialState: State = { message: null, errors: {} };
   const [state, dispatch] = useActionState(updatePortalApiConfig, initialState);
@@ -104,7 +107,8 @@ export default function ApiKeyConfig({ organization, initialConfig }: ApiKeyConf
               API configuration verified
               {initialConfig.last_verified && (
                 <span className="ml-1">
-                  on {new Date(initialConfig.last_verified).toLocaleDateString()}
+                  on{' '}
+                  {new Date(initialConfig.last_verified).toLocaleDateString()}
                 </span>
               )}
             </p>

@@ -115,13 +115,19 @@ const DATA_SECTIONS = [
   },
 ];
 
-export default function SchemaForm({ organization, initialApiConfig }: SchemaFormProps) {
+export default function SchemaForm({
+  organization,
+  initialApiConfig,
+}: SchemaFormProps) {
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
 
   return (
     <div className="space-y-6">
       {/* API Key Configuration */}
-      <ApiKeyConfig organization={organization} initialConfig={initialApiConfig} />
+      <ApiKeyConfig
+        organization={organization}
+        initialConfig={initialApiConfig}
+      />
 
       {/* Data Mapping */}
       <div className="rounded-lg bg-white p-6 shadow">
@@ -137,10 +143,11 @@ export default function SchemaForm({ organization, initialApiConfig }: SchemaFor
             {DATA_SECTIONS.map((section) => (
               <div
                 key={section.id}
-                className={`cursor-pointer rounded-md border p-4 transition-colors ${selectedSection === section.id
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300'
-                  }`}
+                className={`cursor-pointer rounded-md border p-4 transition-colors ${
+                  selectedSection === section.id
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
                 onClick={() => setSelectedSection(section.id)}
               >
                 <h4 className="text-sm font-medium text-gray-900">
