@@ -4,7 +4,6 @@ import {
   UserGroupIcon,
   HomeIcon,
   DocumentDuplicateIcon,
-  CommandLineIcon,
   WindowIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
@@ -20,13 +19,13 @@ export default function TopNavLinks({ isOwner }: TopNavLinksProps) {
 
   const links = [
     { name: 'Home', href: '/dashboard', icon: HomeIcon },
-    // Temporarily hidden
-    // {
-    //   name: 'Invoices',
-    //   href: '/invoices',
-    //   icon: DocumentDuplicateIcon,
-    // },
-    // { name: 'Customers', href: '/customers', icon: UserGroupIcon },
+
+    {
+      name: 'Invoices',
+      href: '/invoices',
+      icon: DocumentDuplicateIcon,
+    },
+    { name: 'Customers', href: '/customers', icon: UserGroupIcon },
     { name: 'Portal', href: '/portal', icon: WindowIcon },
   ];
 

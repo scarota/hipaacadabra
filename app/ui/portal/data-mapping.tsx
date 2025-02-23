@@ -1,260 +1,244 @@
 'use client';
 
 import { useState } from 'react';
+import { useActionState } from 'react';
 import { Button } from '@/app/ui/button';
+import { updateFieldMapping } from '@/app/lib/portal-actions';
+import type { FieldMappingState } from '@/app/lib/portal-actions';
 
-// Data sections configuration
-const DATA_SECTIONS = [
-  {
-    id: 'users',
-    name: 'User Mapping',
-    description: 'Map EHR patients to portal users',
-    fields: [
-      {
-        name: 'ehrPatientId',
-        label: 'EHR Patient ID',
-        type: 'string',
-        required: true,
-      },
-      { name: 'ehrMrn', label: 'Medical Record Number', type: 'string' },
-      {
-        name: 'firstName',
-        label: 'First Name',
-        type: 'string',
-        required: true,
-      },
-      { name: 'lastName', label: 'Last Name', type: 'string', required: true },
-      {
-        name: 'dateOfBirth',
-        label: 'Date of Birth',
-        type: 'date',
-        required: true,
-      },
-      { name: 'email', label: 'Email', type: 'string', required: true },
-      { name: 'phone', label: 'Phone', type: 'string' },
-      { name: 'address.street', label: 'Street Address', type: 'string' },
-      { name: 'address.city', label: 'City', type: 'string' },
-      { name: 'address.state', label: 'State', type: 'string' },
-      { name: 'address.zipCode', label: 'Zip Code', type: 'string' },
-    ],
-    endpoint: '/patients/{id}',
-    authMethods: ['email', 'mrn', 'dob'],
-  },
-  {
-    id: 'appointments',
-    name: 'Appointments',
-    description: 'Patient appointments and scheduling data',
-    fields: [
-      { name: 'id', label: 'Appointment ID', type: 'string', required: true },
-      { name: 'date', label: 'Date', type: 'date', required: true },
-      { name: 'time', label: 'Time', type: 'string', required: true },
-      { name: 'provider', label: 'Provider', type: 'string', required: true },
-      { name: 'location', label: 'Location', type: 'string', required: true },
-      { name: 'status', label: 'Status', type: 'string', required: true },
-      { name: 'type', label: 'Type', type: 'string' },
-      { name: 'notes', label: 'Notes', type: 'string' },
-    ],
-    endpoint: '/appointments',
-  },
-  {
-    id: 'invoices',
-    name: 'Invoices',
-    description: 'Billing and payment information',
-    fields: [
-      { name: 'id', label: 'Invoice ID', type: 'string', required: true },
-      { name: 'amount', label: 'Amount', type: 'number', required: true },
-      { name: 'date', label: 'Date', type: 'date', required: true },
-      { name: 'dueDate', label: 'Due Date', type: 'date' },
-      { name: 'status', label: 'Status', type: 'string', required: true },
-      { name: 'items', label: 'Line Items', type: 'array' },
-      {
-        name: 'patientId',
-        label: 'Patient ID',
-        type: 'string',
-        required: true,
-      },
-    ],
-    endpoint: '/invoices',
-  },
-  {
-    id: 'officeHours',
-    name: 'Office Hours',
-    description: 'Provider availability and office hours',
-    fields: [
-      {
-        name: 'locationId',
-        label: 'Location ID',
-        type: 'string',
-        required: true,
-      },
-      { name: 'name', label: 'Location Name', type: 'string', required: true },
-      { name: 'hours', label: 'Hours', type: 'array', required: true },
-      { name: 'providers', label: 'Providers', type: 'array' },
-      { name: 'address', label: 'Address', type: 'object', required: true },
-      { name: 'phone', label: 'Phone', type: 'string', required: true },
-      { name: 'email', label: 'Email', type: 'string' },
-    ],
-    endpoint: '/locations',
-  },
-];
+// Data sections configuration - simplified to focus on user mapping
+const USER_MAPPING = {
+  id: 'users',
+  name: 'User Mapping',
+  description: 'Map EHR patients to portal users',
+  endpoint: '/patients/{id}',
+  fields: [
+    {
+      name: 'ehrPatientId',
+      label: 'EHR Patient ID',
+      type: 'string',
+      required: true,
+      description: 'Unique identifier for the patient in the EHR system',
+    },
+    {
+      name: 'email',
+      label: 'Email',
+      type: 'string',
+      required: true,
+      description: 'Email address for portal access and notifications',
+    },
+    {
+      name: 'firstName',
+      label: 'First Name',
+      type: 'string',
+      required: true,
+      description: "Patient's first name",
+    },
+    {
+      name: 'lastName',
+      label: 'Last Name',
+      type: 'string',
+      required: true,
+      description: "Patient's last name",
+    },
+    {
+      name: 'dateOfBirth',
+      label: 'Date of Birth',
+      type: 'date',
+      required: true,
+      description: "Patient's date of birth (YYYY-MM-DD)",
+    },
+    {
+      name: 'phone',
+      label: 'Phone',
+      type: 'string',
+      required: false,
+      description: 'Contact phone number',
+    },
+  ],
+};
 
 interface DataMappingProps {
-  organization: {
-    orgCode: string;
-    orgName: string;
-  };
+  initialMapping?: {
+    endpoint: string;
+    mappings: Record<string, string>;
+  } | null;
 }
 
-interface EndpointValues {
-  [key: string]: string;
-}
+export default function DataMapping({ initialMapping }: DataMappingProps) {
+  const initialState: FieldMappingState = { message: null, errors: {} };
+  const [state, dispatch] = useActionState(updateFieldMapping, initialState);
+  const [endpoint, setEndpoint] = useState<string>(
+    initialMapping?.endpoint || USER_MAPPING.endpoint,
+  );
+  const [fieldMappings, setFieldMappings] = useState<Record<string, string>>(
+    initialMapping?.mappings || {},
+  );
 
-export default function DataMapping({ organization }: DataMappingProps) {
-  const [selectedSection, setSelectedSection] = useState<string | null>(null);
-  const [endpoints, setEndpoints] = useState<EndpointValues>(() => {
-    // Initialize with default endpoints from DATA_SECTIONS
-    return DATA_SECTIONS.reduce((acc, section) => {
-      acc[section.id] = section.endpoint;
-      return acc;
-    }, {} as EndpointValues);
-  });
-
-  const handleEndpointChange = (sectionId: string, value: string) => {
-    setEndpoints((prev) => ({
+  const handleFieldMappingChange = (fieldName: string, value: string) => {
+    setFieldMappings((prev) => ({
       ...prev,
-      [sectionId]: value,
+      [fieldName]: value,
     }));
   };
 
   return (
     <div className="rounded-lg bg-white p-6 shadow">
-      <h2 className="text-lg font-medium text-gray-900">Data Mapping</h2>
+      <h2 className="text-lg font-medium text-gray-900">
+        Patient Data Mapping
+      </h2>
       <p className="mt-1 text-sm text-gray-500">
-        Configure how your API data maps to our schema
+        Configure how your EHR patient data maps to portal users
       </p>
 
-      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Data Sections */}
-        <div className="space-y-4">
-          <h3 className="text-sm font-medium text-gray-700">Data Sections</h3>
-          {DATA_SECTIONS.map((section) => (
-            <div
-              key={section.id}
-              className={`cursor-pointer rounded-md border p-4 transition-colors ${
-                selectedSection === section.id
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
-              onClick={() => setSelectedSection(section.id)}
-            >
-              <h4 className="text-sm font-medium text-gray-900">
-                {section.name}
-              </h4>
-              <p className="mt-1 text-sm text-gray-500">
-                {section.description}
-              </p>
+      <form action={dispatch} className="mt-6 space-y-6">
+        {/* Endpoint Configuration */}
+        <div>
+          <label
+            htmlFor="endpoint"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Patient API Endpoint
+          </label>
+          <div className="mt-1">
+            <input
+              type="text"
+              id="endpoint"
+              name="endpoint"
+              value={endpoint}
+              onChange={(e) => setEndpoint(e.target.value)}
+              className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              placeholder={USER_MAPPING.endpoint}
+            />
+          </div>
+          <p className="mt-1 text-xs text-gray-500">
+            The endpoint path for retrieving patient data. Use {'{id}'} to
+            indicate the patient identifier.
+          </p>
+          <div className="mt-2 rounded-md bg-blue-50 p-3">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-5 w-5 text-blue-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-blue-800">
+                  Mapping Example
+                </h3>
+                <div className="mt-2 text-sm text-blue-700">
+                  <p className="mb-2">For a JSON response like:</p>
+                  <pre className="mb-2 overflow-x-auto rounded bg-blue-100 p-2 font-mono text-xs">
+                    {`{
+  "data": {
+    "patient_id": "12345",
+    "personal_info": {
+      "given_name": "John",
+      "family_name": "Doe",
+      "birth_date": "1990-01-01"
+    },
+    "contact": {
+      "email_address": "john@example.com",
+      "phone_number": "555-0123"
+    }
+  }
+}`}
+                  </pre>
+                  <p className="mb-2">Map the fields like:</p>
+                  <ul className="list-inside list-disc space-y-1">
+                    <li>
+                      EHR Patient ID:{' '}
+                      <span className="font-mono text-xs">data.patient_id</span>
+                    </li>
+                    <li>
+                      First Name:{' '}
+                      <span className="font-mono text-xs">
+                        data.personal_info.given_name
+                      </span>
+                    </li>
+                    <li>
+                      Email:{' '}
+                      <span className="font-mono text-xs">
+                        data.contact.email_address
+                      </span>
+                    </li>
+                  </ul>
+                  <p className="mt-2">
+                    Make sure the email field maps to the address used for
+                    portal login.
+                  </p>
+                </div>
+              </div>
             </div>
-          ))}
+          </div>
+          {state.errors?.endpoint && (
+            <div className="mt-2 text-sm text-red-600">
+              {state.errors.endpoint.join(', ')}
+            </div>
+          )}
         </div>
 
-        {/* Field Mapping */}
+        {/* Field Mappings */}
         <div className="space-y-4">
-          <h3 className="text-sm font-medium text-gray-700">Field Mapping</h3>
-          {selectedSection ? (
-            <div className="rounded-md border border-gray-200 p-4">
-              <div className="space-y-6">
-                {/* Endpoint Configuration */}
-                <div>
+          <h3 className="text-sm font-medium text-gray-700">Field Mappings</h3>
+          <div className="rounded-md border border-gray-200 p-4">
+            <div className="space-y-4">
+              {USER_MAPPING.fields.map((field) => (
+                <div key={field.name}>
                   <label
-                    htmlFor={`${selectedSection}-endpoint`}
-                    className="block text-sm font-medium text-gray-700"
+                    htmlFor={field.name}
+                    className="flex items-center text-sm font-medium text-gray-700"
                   >
-                    API Endpoint
+                    {field.label}
+                    {field.required && (
+                      <span className="ml-1 text-red-500">*</span>
+                    )}
                   </label>
                   <div className="mt-1">
                     <input
                       type="text"
-                      id={`${selectedSection}-endpoint`}
-                      name={`${selectedSection}-endpoint`}
-                      value={endpoints[selectedSection]}
+                      id={field.name}
+                      name={field.name}
+                      value={fieldMappings[field.name] || ''}
                       onChange={(e) =>
-                        handleEndpointChange(selectedSection, e.target.value)
+                        handleFieldMappingChange(field.name, e.target.value)
                       }
                       className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      placeholder="/api/v1/endpoint"
+                      placeholder={`${field.name}`}
                     />
-                  </div>
-                  <p className="mt-1 text-xs text-gray-500">
-                    The endpoint path for{' '}
-                    {DATA_SECTIONS.find(
-                      (s) => s.id === selectedSection,
-                    )?.name.toLowerCase()}
-                  </p>
-                </div>
-
-                <div className="border-t border-gray-200 pt-4">
-                  <h4 className="mb-4 text-sm font-medium text-gray-700">
-                    Response Field Mapping
-                  </h4>
-                  <div className="space-y-4">
-                    {DATA_SECTIONS.find(
-                      (s) => s.id === selectedSection,
-                    )?.fields.map((field) => (
-                      <div key={field.name}>
-                        <label
-                          htmlFor={`${selectedSection}-${field.name}`}
-                          className="flex items-center text-sm font-medium text-gray-700"
-                        >
-                          {field.label}
-                          {field.required && (
-                            <span className="ml-1 text-red-500">*</span>
-                          )}
-                        </label>
-                        <div className="mt-1 flex gap-x-3">
-                          <input
-                            type="text"
-                            id={`${selectedSection}-${field.name}`}
-                            name={`${selectedSection}-${field.name}`}
-                            className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                            placeholder={`response.data.${field.name}`}
-                          />
-                          <select
-                            className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                            defaultValue={field.type}
-                          >
-                            <option value="string">String</option>
-                            <option value="number">Number</option>
-                            <option value="date">Date</option>
-                            <option value="boolean">Boolean</option>
-                            <option value="array">Array</option>
-                            <option value="object">Object</option>
-                          </select>
-                        </div>
-                        {field.type === 'array' && (
-                          <p className="mt-1 text-xs text-gray-500">
-                            Use JSONPath syntax for array mapping (e.g.,
-                            items[*].value)
-                          </p>
-                        )}
-                      </div>
-                    ))}
+                    <p className="mt-1 text-xs text-gray-500">
+                      {field.description}
+                    </p>
                   </div>
                 </div>
-              </div>
+              ))}
             </div>
-          ) : (
-            <div className="rounded-md border border-gray-200 p-4">
-              <p className="text-sm text-gray-500">
-                Select a data section to configure field mapping
-              </p>
+          </div>
+          {state.errors?.mappings && (
+            <div className="mt-2 text-sm text-red-600">
+              {state.errors.mappings.join(', ')}
             </div>
           )}
         </div>
-      </div>
 
-      <div className="mt-6 flex justify-end">
-        <Button type="submit">Save mapping</Button>
-      </div>
+        {state.message && !state.errors && (
+          <div className="rounded-md bg-green-50 p-4">
+            <p className="text-sm text-green-700">{state.message}</p>
+          </div>
+        )}
+
+        <div className="flex justify-end">
+          <Button type="submit">Save mapping</Button>
+        </div>
+      </form>
     </div>
   );
 }

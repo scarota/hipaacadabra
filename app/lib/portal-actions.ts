@@ -83,3 +83,80 @@ export async function updatePortalApiConfig(
     await prisma.$disconnect();
   }
 }
+
+export type FieldMappingState = {
+  message: string | null;
+  errors?: {
+    endpoint?: string[];
+    mappings?: string[];
+  };
+};
+
+const FieldMappingSchema = z.object({
+  endpoint: z.string().min(1, 'Endpoint is required'),
+  mappings: z.record(z.string().min(1, 'Field mapping is required')),
+});
+
+export async function updateFieldMapping(
+  prevState: FieldMappingState,
+  formData: FormData,
+): Promise<FieldMappingState> {
+  const validatedFields = FieldMappingSchema.safeParse({
+    endpoint: formData.get('endpoint'),
+    mappings: Object.fromEntries(
+      Array.from(formData.entries()).filter(([key]) => key !== 'endpoint'),
+    ),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      message: 'Invalid form data. Please check your inputs.',
+      errors: validatedFields.error.flatten().fieldErrors,
+    };
+  }
+
+  const prisma = new PrismaClient();
+  const org = await getUserOrganization();
+
+  if (!org?.orgCode) {
+    return {
+      message: 'Organization not found',
+      errors: {
+        endpoint: ['Unable to save configuration: Organization not found'],
+      },
+    };
+  }
+
+  try {
+    await prisma.field_mappings.upsert({
+      where: {
+        org_code: org.orgCode,
+      },
+      update: {
+        endpoint: validatedFields.data.endpoint,
+        mappings: validatedFields.data.mappings,
+      },
+      create: {
+        org_code: org.orgCode,
+        endpoint: validatedFields.data.endpoint,
+        mappings: validatedFields.data.mappings,
+      },
+    });
+
+    revalidatePath('/portal/schema');
+
+    return {
+      message: 'Field mappings updated successfully',
+    };
+  } catch (error) {
+    console.error('Database Error:', error);
+    return {
+      message: 'Failed to update field mappings',
+      errors: {
+        mappings: ['Failed to save field mappings'],
+      },
+    };
+  } finally {
+    await prisma.$disconnect();
+  }
+}

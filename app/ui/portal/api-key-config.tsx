@@ -8,10 +8,6 @@ import { updatePortalApiConfig } from '@/app/lib/portal-actions';
 import type { State } from '@/app/lib/portal-actions';
 
 interface ApiKeyConfigProps {
-  organization: {
-    orgCode: string;
-    orgName: string;
-  };
   initialConfig?: {
     id: string;
     org_code: string;
@@ -22,10 +18,7 @@ interface ApiKeyConfigProps {
   } | null;
 }
 
-export default function ApiKeyConfig({
-  organization,
-  initialConfig,
-}: ApiKeyConfigProps) {
+export default function ApiKeyConfig({ initialConfig }: ApiKeyConfigProps) {
   const [showApiKey, setShowApiKey] = useState(false);
   const initialState: State = { message: null, errors: {} };
   const [state, dispatch] = useActionState(updatePortalApiConfig, initialState);
