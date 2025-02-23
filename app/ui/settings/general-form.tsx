@@ -6,6 +6,7 @@ import { updateOrganization } from '@/app/lib/kinde-actions';
 import type { State } from '@/app/lib/kinde-actions';
 import { useRef, useState } from 'react';
 import { PhotoIcon } from '@heroicons/react/24/outline';
+import Image from 'next/image';
 
 interface GeneralFormProps {
   organizationName: string;
@@ -85,18 +86,22 @@ export default function GeneralForm({
               Logo
             </label>
             <div className="mt-2 flex items-center gap-x-3">
-              <div className="h-16 w-16 overflow-hidden rounded-lg bg-gray-100">
+              <div className="relative h-16 w-16 overflow-hidden rounded-lg bg-gray-100">
                 {previewUrl ? (
-                  <img
+                  <Image
                     src={previewUrl}
                     alt="Logo preview"
-                    className="h-full w-full object-cover"
+                    fill
+                    className="object-cover"
+                    sizes="64px"
                   />
                 ) : logo ? (
-                  <img
+                  <Image
                     src={logo}
                     alt="Organization logo"
-                    className="h-full w-full object-cover"
+                    fill
+                    className="object-cover"
+                    sizes="64px"
                   />
                 ) : (
                   <div className="flex h-full w-full flex-col items-center justify-center bg-gray-50 p-2">

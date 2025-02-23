@@ -17,8 +17,6 @@ interface ApiKeyConfigProps {
     org_code: string;
     api_key: string;
     base_url: string;
-    is_verified: boolean;
-    last_verified: Date | null;
     created_at: Date;
     updated_at: Date;
   } | null;
@@ -100,20 +98,6 @@ export default function ApiKeyConfig({
             </p>
           )}
         </div>
-
-        {initialConfig?.is_verified && (
-          <div className="rounded-md bg-green-50 p-4">
-            <p className="text-sm text-green-700">
-              API configuration verified
-              {initialConfig.last_verified && (
-                <span className="ml-1">
-                  on{' '}
-                  {new Date(initialConfig.last_verified).toLocaleDateString()}
-                </span>
-              )}
-            </p>
-          </div>
-        )}
 
         {state.message && !state.errors && (
           <div className="rounded-md bg-green-50 p-4">

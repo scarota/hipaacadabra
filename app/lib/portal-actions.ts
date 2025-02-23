@@ -58,13 +58,11 @@ export async function updatePortalApiConfig(
       update: {
         api_key: encryptedApiKey,
         base_url: validatedFields.data.baseUrl,
-        is_verified: false, // Reset verification status on update
       },
       create: {
         org_code: org.orgCode,
         api_key: encryptedApiKey,
         base_url: validatedFields.data.baseUrl,
-        is_verified: false,
       },
     });
 

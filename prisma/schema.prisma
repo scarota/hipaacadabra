@@ -31,8 +31,6 @@ model portal_api_configs {
   org_code      String    @unique @db.String(20)
   api_key       String    @db.String(255) // Encrypted
   base_url      String    @db.String(255)
-  is_verified   Boolean   @default(false)
-  last_verified DateTime?
   created_at    DateTime  @default(now())
   updated_at    DateTime  @updatedAt
 }

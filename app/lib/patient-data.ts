@@ -28,14 +28,17 @@ async function getApiConfig(): Promise<ApiConfig> {
 }
 
 // Helper function to make API requests
-async function makeApiRequest<T>(endpoint: string, options?: RequestInit): Promise<T> {
+async function makeApiRequest<T>(
+  endpoint: string,
+  options?: RequestInit,
+): Promise<T> {
   const config = await getApiConfig();
   const url = `${config.baseUrl}${endpoint}`;
 
   const response = await fetch(url, {
     ...options,
     headers: {
-      'Authorization': `Bearer ${config.apiKey}`,
+      Authorization: `Bearer ${config.apiKey}`,
       'Content-Type': 'application/json',
       ...options?.headers,
     },
@@ -62,7 +65,7 @@ export async function fetchPatientAppointments(
     // This endpoint would match what's configured in your data mapping
     const endpoint = `/api/patients/${patientId}/appointments`;
     const queryParams = new URLSearchParams();
-    
+
     if (options?.status) {
       queryParams.append('status', options.status);
     }
@@ -82,7 +85,7 @@ export async function fetchPatientAppointments(
     // For now, return mock data
     // TODO: Replace with actual API call using makeApiRequest
     // return makeApiRequest<Appointment[]>(fullEndpoint);
-    
+
     return [
       {
         id: '1',
@@ -138,10 +141,10 @@ export async function fetchUpcomingAppointments(
     // This would use the endpoint defined in your data mapping
     const endpoint = `/api/patients/${patientId}/appointments/upcoming`;
     // TODO: Replace with actual API call
-    // return makeApiRequest<Appointment[]>(endpoint, { 
+    // return makeApiRequest<Appointment[]>(endpoint, {
     //   query: { limit }
     // });
-    
+
     const allAppointments = await fetchPatientAppointments(patientId);
     return allAppointments
       .filter((apt) => apt.status === 'scheduled')
@@ -162,11 +165,11 @@ export async function fetchAppointmentById(
     const endpoint = `/api/patients/${patientId}/appointments/${appointmentId}`;
     // TODO: Replace with actual API call
     // return makeApiRequest<Appointment>(endpoint);
-    
+
     const appointments = await fetchPatientAppointments(patientId);
     return appointments.find((apt) => apt.id === appointmentId) || null;
   } catch (error) {
     console.error('Failed to fetch appointment:', error);
     throw new Error('Failed to fetch appointment');
   }
-} 
+}
