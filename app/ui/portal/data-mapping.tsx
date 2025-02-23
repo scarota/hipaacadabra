@@ -5,58 +5,7 @@ import { useActionState } from 'react';
 import { Button } from '@/app/ui/button';
 import { updateFieldMapping } from '@/app/lib/portal-actions';
 import type { FieldMappingState } from '@/app/lib/portal-actions';
-
-// Data sections configuration - simplified to focus on user mapping
-const USER_MAPPING = {
-  id: 'users',
-  name: 'User Mapping',
-  description: 'Map EHR patients to portal users',
-  endpoint: '/patients/{id}',
-  fields: [
-    {
-      name: 'ehrPatientId',
-      label: 'EHR Patient ID',
-      type: 'string',
-      required: true,
-      description: 'Unique identifier for the patient in the EHR system',
-    },
-    {
-      name: 'email',
-      label: 'Email',
-      type: 'string',
-      required: true,
-      description: 'Email address for portal access and notifications',
-    },
-    {
-      name: 'firstName',
-      label: 'First Name',
-      type: 'string',
-      required: true,
-      description: "Patient's first name",
-    },
-    {
-      name: 'lastName',
-      label: 'Last Name',
-      type: 'string',
-      required: true,
-      description: "Patient's last name",
-    },
-    {
-      name: 'dateOfBirth',
-      label: 'Date of Birth',
-      type: 'date',
-      required: true,
-      description: "Patient's date of birth (YYYY-MM-DD)",
-    },
-    {
-      name: 'phone',
-      label: 'Phone',
-      type: 'string',
-      required: false,
-      description: 'Contact phone number',
-    },
-  ],
-};
+import { USER_MAPPING } from '@/app/lib/field-mapping-constants';
 
 interface DataMappingProps {
   initialMapping?: {

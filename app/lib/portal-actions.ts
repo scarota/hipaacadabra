@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { PrismaClient } from '@prisma/client';
 import { getUserOrganization } from '@/app/lib/kinde-data';
 import { encrypt } from '@/app/lib/encryption';
+import { USER_MAPPING } from '@/app/lib/field-mapping-constants';
 
 export type State = {
   message: string | null;
@@ -94,18 +95,40 @@ export type FieldMappingState = {
 
 const FieldMappingSchema = z.object({
   endpoint: z.string().min(1, 'Endpoint is required'),
-  mappings: z.record(z.string().min(1, 'Field mapping is required')),
+  mappings: z.record(z.string()).refine(
+    (mappings) => {
+      // Check that all required fields have a mapping
+      return USER_MAPPING.fields
+        .filter((field) => field.required)
+        .every(
+          (field) => mappings[field.name] && mappings[field.name].trim() !== '',
+        );
+    },
+    {
+      message: 'All required fields must have a mapping',
+      path: ['mappings'],
+    },
+  ),
 });
 
 export async function updateFieldMapping(
   prevState: FieldMappingState,
   formData: FormData,
 ): Promise<FieldMappingState> {
+  // Extract endpoint and mappings from form data
+  const endpoint = formData.get('endpoint')?.toString() || '';
+  const mappings: Record<string, string> = {};
+
+  // Get all field mappings except endpoint
+  Array.from(formData.entries()).forEach(([key, value]) => {
+    if (key !== 'endpoint' && value) {
+      mappings[key] = value.toString();
+    }
+  });
+
   const validatedFields = FieldMappingSchema.safeParse({
-    endpoint: formData.get('endpoint'),
-    mappings: Object.fromEntries(
-      Array.from(formData.entries()).filter(([key]) => key !== 'endpoint'),
-    ),
+    endpoint,
+    mappings,
   });
 
   if (!validatedFields.success) {
