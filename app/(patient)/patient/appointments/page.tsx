@@ -1,49 +1,22 @@
 import { Metadata } from 'next';
 import {
   CalendarIcon,
-  ClockIcon,
   MapPinIcon,
   UserIcon,
 } from '@heroicons/react/24/outline';
+import { fetchPatientAppointments } from '@/app/lib/patient-data';
 
 export const metadata: Metadata = {
   title: 'Appointments',
 };
 
-// Mock data
-const appointments = [
-  {
-    id: '1',
-    date: '2024-02-20',
-    time: '10:00 AM',
-    provider: 'Dr. Smith',
-    type: 'Check-up',
-    location: 'Main Clinic - Room 102',
-    status: 'upcoming',
-  },
-  {
-    id: '2',
-    date: '2024-03-05',
-    time: '2:30 PM',
-    provider: 'Dr. Johnson',
-    type: 'Follow-up',
-    location: 'North Branch - Room 205',
-    status: 'upcoming',
-  },
-  {
-    id: '3',
-    date: '2024-01-15',
-    time: '11:30 AM',
-    provider: 'Dr. Smith',
-    type: 'Initial Consultation',
-    location: 'Main Clinic - Room 102',
-    status: 'completed',
-  },
-];
+export default async function AppointmentsPage() {
+  // TODO: Get actual patient ID from auth session
+  const patientId = 'mock-patient-id';
+  const appointments = await fetchPatientAppointments(patientId);
 
-export default function AppointmentsPage() {
   const upcomingAppointments = appointments.filter(
-    (apt) => apt.status === 'upcoming',
+    (apt) => apt.status === 'scheduled',
   );
   const pastAppointments = appointments.filter(
     (apt) => apt.status === 'completed',
@@ -85,6 +58,9 @@ export default function AppointmentsPage() {
                     <MapPinIcon className="h-4 w-4" />
                     <span>{appointment.location}</span>
                   </div>
+                  {appointment.notes && (
+                    <p className="text-sm text-gray-500">{appointment.notes}</p>
+                  )}
                 </div>
                 <button className="rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-100">
                   Cancel
@@ -92,6 +68,11 @@ export default function AppointmentsPage() {
               </div>
             </div>
           ))}
+          {upcomingAppointments.length === 0 && (
+            <p className="py-4 text-sm text-gray-500">
+              No upcoming appointments scheduled.
+            </p>
+          )}
         </div>
       </div>
 
@@ -119,9 +100,15 @@ export default function AppointmentsPage() {
                   <MapPinIcon className="h-4 w-4" />
                   <span>{appointment.location}</span>
                 </div>
+                {appointment.notes && (
+                  <p className="text-sm text-gray-500">{appointment.notes}</p>
+                )}
               </div>
             </div>
           ))}
+          {pastAppointments.length === 0 && (
+            <p className="py-4 text-sm text-gray-500">No past appointments.</p>
+          )}
         </div>
       </div>
     </div>
