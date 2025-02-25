@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { PrismaClient } from '@prisma/client';
 import { getUserOrganization } from '@/app/lib/kinde-data';
 import { encrypt } from '@/app/lib/encryption';
-import { USER_MAPPING } from '@/app/lib/field-mapping-constants';
+import { DATA_MAPPINGS } from '@/app/lib/field-mapping-constants';
 
 export type State = {
   message: string | null;
@@ -90,43 +90,58 @@ export type FieldMappingState = {
   errors?: {
     endpoint?: string[];
     mappings?: string[];
+    mappingType?: string[];
   };
 };
 
-const FieldMappingSchema = z.object({
-  endpoint: z.string().min(1, 'Endpoint is required'),
-  mappings: z.record(z.string()).refine(
-    (mappings) => {
+const FieldMappingSchema = z
+  .object({
+    mappingType: z.string().min(1, 'Mapping type is required'),
+    endpoint: z.string().min(1, 'Endpoint is required'),
+    mappings: z.record(z.string()),
+  })
+  .refine(
+    (data) => {
+      // Get the mapping definition based on the mapping type
+      const mappingDef = DATA_MAPPINGS[data.mappingType];
+
+      if (!mappingDef) {
+        return false;
+      }
+
       // Check that all required fields have a mapping
-      return USER_MAPPING.fields
+      return mappingDef.fields
         .filter((field) => field.required)
         .every(
-          (field) => mappings[field.name] && mappings[field.name].trim() !== '',
+          (field) =>
+            data.mappings[field.name] &&
+            data.mappings[field.name].trim() !== '',
         );
     },
     {
       message: 'All required fields must have a mapping',
       path: ['mappings'],
     },
-  ),
-});
+  );
 
 export async function updateFieldMapping(
   prevState: FieldMappingState,
   formData: FormData,
 ): Promise<FieldMappingState> {
-  // Extract endpoint and mappings from form data
+  // Extract mapping type, endpoint and mappings from form data
+  const mappingType = formData.get('mappingType')?.toString() || '';
   const endpoint = formData.get('endpoint')?.toString() || '';
   const mappings: Record<string, string> = {};
 
-  // Get all field mappings except endpoint
+  // Get all field mappings except endpoint and mappingType
   Array.from(formData.entries()).forEach(([key, value]) => {
-    if (key !== 'endpoint' && value) {
+    if (key !== 'endpoint' && key !== 'mappingType' && value) {
       mappings[key] = value.toString();
     }
   });
 
   const validatedFields = FieldMappingSchema.safeParse({
+    mappingType,
     endpoint,
     mappings,
   });
@@ -153,7 +168,10 @@ export async function updateFieldMapping(
   try {
     await prisma.field_mappings.upsert({
       where: {
-        org_code: org.orgCode,
+        org_code_mapping_type: {
+          org_code: org.orgCode,
+          mapping_type: validatedFields.data.mappingType,
+        },
       },
       update: {
         endpoint: validatedFields.data.endpoint,
@@ -161,6 +179,7 @@ export async function updateFieldMapping(
       },
       create: {
         org_code: org.orgCode,
+        mapping_type: validatedFields.data.mappingType,
         endpoint: validatedFields.data.endpoint,
         mappings: validatedFields.data.mappings,
       },
@@ -169,7 +188,7 @@ export async function updateFieldMapping(
     revalidatePath('/portal/schema');
 
     return {
-      message: 'Field mappings updated successfully',
+      message: `${validatedFields.data.mappingType} field mappings updated successfully`,
     };
   } catch (error) {
     console.error('Database Error:', error);

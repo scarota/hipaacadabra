@@ -33,15 +33,19 @@ model portal_api_configs {
   base_url      String         @db.String(255)
   created_at    DateTime       @default(now())
   updated_at    DateTime       @updatedAt
-  field_mapping field_mappings?
+  field_mappings field_mappings[]
 }
 
 model field_mappings {
   id            String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  org_code      String    @unique @db.String(20)
+  org_code      String    @db.String(20)
+  mapping_type  String    @db.String(50) // e.g., "patient", "appointment", "invoice"
   endpoint      String    @db.String(255)
   mappings      Json      // Stores the field mappings as JSON
   created_at    DateTime  @default(now())
   updated_at    DateTime  @updatedAt
   api_config    portal_api_configs @relation(fields: [org_code], references: [org_code])
+  
+  @@unique([org_code, mapping_type]) // Ensure one mapping per type per organization
+  @@map("field_mappings")
 }
