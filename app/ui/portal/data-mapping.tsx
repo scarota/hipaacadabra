@@ -205,21 +205,15 @@ export default function DataMapping({ initialMapping }: DataMappingProps) {
           )}
         </div>
 
+        {state.message && !state.errors && (
+          <div className="rounded-md bg-green-50 p-4">
+            <p className="text-sm text-green-700">{state.message}</p>
+          </div>
+        )}
+
         <div className="flex justify-end">
           <Button type="submit">Save Mapping</Button>
         </div>
-
-        {state.message && (
-          <div
-            className={`mt-4 rounded-md ${
-              state.message.includes('successfully')
-                ? 'bg-green-50 text-green-800'
-                : 'bg-red-50 text-red-800'
-            } p-4`}
-          >
-            <p>{state.message}</p>
-          </div>
-        )}
       </form>
     </div>
   );
