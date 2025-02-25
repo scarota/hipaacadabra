@@ -33,10 +33,27 @@ export default function DataMapping({ initialMapping }: DataMappingProps) {
     initialMapping?.mapping_type || PATIENT_MAPPING.id,
   );
 
-  // Ensure we have a valid endpoint
-  const [endpoint, setEndpoint] = useState<string>(
-    initialMapping?.endpoint || DATA_MAPPINGS[mappingType]?.endpoint || '',
-  );
+  // Store endpoints for each mapping type
+  const [endpoints, setEndpoints] = useState<Record<string, string>>(() => {
+    // Initialize with default endpoints from constants
+    const initialEndpoints: Record<string, string> = {};
+
+    // Set defaults for all mapping types
+    Object.entries(DATA_MAPPINGS).forEach(([type, mapping]) => {
+      initialEndpoints[type] = mapping.endpoint;
+    });
+
+    // If we have an initial mapping, override its endpoint
+    if (initialMapping?.mapping_type && initialMapping?.endpoint) {
+      initialEndpoints[initialMapping.mapping_type] = initialMapping.endpoint;
+    }
+
+    return initialEndpoints;
+  });
+
+  // Current endpoint is based on the selected mapping type
+  const endpoint =
+    endpoints[mappingType] || DATA_MAPPINGS[mappingType]?.endpoint || '';
 
   // Ensure we have valid field mappings
   const initialFieldMappings = initialMapping?.mappings || {};
@@ -59,8 +76,13 @@ export default function DataMapping({ initialMapping }: DataMappingProps) {
 
   const handleMappingTypeChange = (newType: string) => {
     setMappingType(newType);
-    // Update endpoint to the default for the selected mapping type
-    setEndpoint(DATA_MAPPINGS[newType]?.endpoint || '');
+  };
+
+  const handleEndpointChange = (value: string) => {
+    setEndpoints((prev) => ({
+      ...prev,
+      [mappingType]: value,
+    }));
   };
 
   const handleFieldMappingChange = (fieldName: string, value: string) => {
@@ -124,7 +146,7 @@ export default function DataMapping({ initialMapping }: DataMappingProps) {
               id="endpoint"
               name="endpoint"
               value={endpoint}
-              onChange={(e) => setEndpoint(e.target.value)}
+              onChange={(e) => handleEndpointChange(e.target.value)}
               className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               placeholder={currentMapping.endpoint}
             />
