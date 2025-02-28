@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { PrismaClient } from '@prisma/client';
 import { getUserOrganization } from '@/app/lib/kinde-data';
-import { encrypt } from '@/app/lib/encryption';
+import { encrypt, decrypt } from '@/app/lib/encryption';
 import { DATA_MAPPINGS } from '@/app/lib/field-mapping-constants';
 
 export type State = {
@@ -200,5 +200,107 @@ export async function updateFieldMapping(
     };
   } finally {
     await prisma.$disconnect();
+  }
+}
+
+export type ApiTestResult = {
+  success: boolean;
+  data?: any;
+  error?: string;
+  status?: number;
+  duration?: number;
+};
+
+export async function testApiEndpoint(
+  mappingType: string,
+  endpoint: string,
+  testId?: string,
+  authType: 'bearer' | 'x-auth-key' = 'bearer',
+): Promise<ApiTestResult> {
+  try {
+    const prisma = new PrismaClient();
+    const org = await getUserOrganization();
+
+    if (!org?.orgCode) {
+      return {
+        success: false,
+        error: 'Organization not found',
+      };
+    }
+
+    // Get the API configuration
+    const apiConfig = await prisma.portal_api_configs.findUnique({
+      where: {
+        org_code: org.orgCode,
+      },
+    });
+
+    if (!apiConfig) {
+      return {
+        success: false,
+        error:
+          'API configuration not found. Please configure your API settings first.',
+      };
+    }
+
+    // Decrypt the API key
+    const apiKey = await decrypt(apiConfig.api_key);
+
+    // Format the endpoint with the test ID if provided
+    const formattedEndpoint = testId
+      ? endpoint.replace('{id}', testId)
+      : endpoint;
+
+    // Construct the full URL
+    const url = `${apiConfig.base_url}${formattedEndpoint}`;
+
+    // Record start time for performance measurement
+    const startTime = Date.now();
+
+    // Set up headers based on authentication type
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    // Add authentication header based on selected type
+    if (authType === 'bearer') {
+      headers['Authorization'] = `Bearer ${apiKey}`;
+    } else if (authType === 'x-auth-key') {
+      headers['X-Auth-Key'] = apiKey;
+    }
+
+    // Make the API request
+    const response = await fetch(url, {
+      method: 'GET',
+      headers,
+    });
+
+    // Calculate request duration
+    const duration = Date.now() - startTime;
+
+    // Handle the response
+    if (!response.ok) {
+      return {
+        success: false,
+        error: `API request failed with status: ${response.status}`,
+        status: response.status,
+        duration,
+      };
+    }
+
+    const data = await response.json();
+
+    return {
+      success: true,
+      data,
+      status: response.status,
+      duration,
+    };
+  } catch (error) {
+    console.error('API Test Error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
+    };
   }
 }
