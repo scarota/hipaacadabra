@@ -24,6 +24,7 @@ export default function ApiKeyConfig({ initialConfig }: ApiKeyConfigProps) {
   const [authType, setAuthType] = useState<string>(
     initialConfig?.auth_type || '',
   );
+
   const initialState: State = { message: null, errors: {} };
   const [state, dispatch] = useActionState(updatePortalApiConfig, initialState);
 
