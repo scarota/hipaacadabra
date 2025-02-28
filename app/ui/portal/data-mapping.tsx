@@ -408,6 +408,7 @@ export default function DataMapping({ initialMapping }: DataMappingProps) {
                           <tbody>
                             {currentMapping.fields.map((field) => {
                               const ehrField = fieldMappings[field.name] || '';
+
                               const value =
                                 ehrField && testResult.data
                                   ? testResult.data[ehrField] || 'Not found'
