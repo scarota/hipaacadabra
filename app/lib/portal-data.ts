@@ -26,8 +26,13 @@ export async function getPortalApiConfig() {
 
     // Decrypt the API key before returning
     return {
-      ...config,
+      id: config.id,
+      org_code: config.org_code,
       api_key: await decrypt(config.api_key),
+      base_url: config.base_url,
+      auth_type: config.auth_type, // The field exists in the database
+      created_at: config.created_at,
+      updated_at: config.updated_at,
     };
   } catch (error) {
     console.error('Database Error:', error);

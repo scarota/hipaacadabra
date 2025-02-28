@@ -12,12 +12,14 @@ export type State = {
   errors?: {
     apiKey?: string[];
     baseUrl?: string[];
+    authType?: string[];
   };
 };
 
 const ApiConfigSchema = z.object({
   apiKey: z.string().min(1, 'API Key is required'),
   baseUrl: z.string().url('Invalid URL format'),
+  authType: z.enum(['bearer', 'x-auth-key']),
 });
 
 export async function updatePortalApiConfig(
@@ -27,6 +29,7 @@ export async function updatePortalApiConfig(
   const validatedFields = ApiConfigSchema.safeParse({
     apiKey: formData.get('apiKey'),
     baseUrl: formData.get('baseUrl'),
+    authType: formData.get('authType'),
   });
 
   if (!validatedFields.success) {
@@ -52,18 +55,21 @@ export async function updatePortalApiConfig(
     // Encrypt the API key before storing
     const encryptedApiKey = await encrypt(validatedFields.data.apiKey);
 
+    // Create the data object with the validated fields
+    const data = {
+      api_key: encryptedApiKey,
+      base_url: validatedFields.data.baseUrl,
+      auth_type: validatedFields.data.authType,
+    };
+
     await prisma.portal_api_configs.upsert({
       where: {
         org_code: org.orgCode,
       },
-      update: {
-        api_key: encryptedApiKey,
-        base_url: validatedFields.data.baseUrl,
-      },
+      update: data,
       create: {
         org_code: org.orgCode,
-        api_key: encryptedApiKey,
-        base_url: validatedFields.data.baseUrl,
+        ...data,
       },
     });
 
@@ -215,7 +221,6 @@ export async function testApiEndpoint(
   mappingType: string,
   endpoint: string,
   testId?: string,
-  authType: 'bearer' | 'x-auth-key' = 'bearer',
 ): Promise<ApiTestResult> {
   try {
     const prisma = new PrismaClient();
@@ -245,6 +250,9 @@ export async function testApiEndpoint(
 
     // Decrypt the API key
     const apiKey = await decrypt(apiConfig.api_key);
+
+    // Get the authentication type from the API config
+    const authType = apiConfig.auth_type;
 
     // Format the endpoint with the test ID if provided
     const formattedEndpoint = testId

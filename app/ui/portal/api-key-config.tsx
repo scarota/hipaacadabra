@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useActionState } from 'react';
 import { Button } from '@/app/ui/button';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
@@ -13,6 +13,7 @@ interface ApiKeyConfigProps {
     org_code: string;
     api_key: string;
     base_url: string;
+    auth_type: string;
     created_at: Date;
     updated_at: Date;
   } | null;
@@ -20,8 +21,25 @@ interface ApiKeyConfigProps {
 
 export default function ApiKeyConfig({ initialConfig }: ApiKeyConfigProps) {
   const [showApiKey, setShowApiKey] = useState(false);
+  const [authType, setAuthType] = useState<string>(
+    initialConfig?.auth_type || 'bearer',
+  );
   const initialState: State = { message: null, errors: {} };
   const [state, dispatch] = useActionState(updatePortalApiConfig, initialState);
+
+  // Update state when the form is successfully submitted
+  useEffect(() => {
+    if (state.message && !state.errors) {
+      // Form was successfully submitted, update local state if needed
+      const formData = new FormData(
+        document.querySelector('form') as HTMLFormElement,
+      );
+      const newAuthType = formData.get('authType') as string;
+      if (newAuthType && newAuthType !== authType) {
+        setAuthType(newAuthType);
+      }
+    }
+  }, [state, authType]);
 
   return (
     <div className="rounded-lg bg-white p-6 shadow">
@@ -88,6 +106,34 @@ export default function ApiKeyConfig({ initialConfig }: ApiKeyConfigProps) {
           {state.errors?.baseUrl && (
             <p className="mt-2 text-sm text-red-600" id="baseUrl-error">
               {state.errors.baseUrl.join(', ')}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label
+            htmlFor="authType"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Authentication Type
+          </label>
+          <select
+            id="authType"
+            name="authType"
+            value={authType}
+            onChange={(e) => setAuthType(e.target.value)}
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            aria-describedby="authType-error"
+          >
+            <option value="bearer">Bearer Token</option>
+            <option value="x-auth-key">X-Auth-Key Header</option>
+          </select>
+          <p className="mt-1 text-xs text-gray-500">
+            Select how your API key should be sent in the request
+          </p>
+          {state.errors?.authType && (
+            <p className="mt-2 text-sm text-red-600" id="authType-error">
+              {state.errors.authType.join(', ')}
             </p>
           )}
         </div>

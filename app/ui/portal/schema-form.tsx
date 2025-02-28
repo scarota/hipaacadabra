@@ -10,6 +10,7 @@ interface SchemaFormProps {
     org_code: string;
     api_key: string;
     base_url: string;
+    auth_type: string;
     created_at: Date;
     updated_at: Date;
   } | null;

@@ -31,6 +31,7 @@ model portal_api_configs {
   org_code      String         @unique @db.String(20)
   api_key       String         @db.String(255) // Encrypted
   base_url      String         @db.String(255)
+  auth_type     String         @default("bearer") @db.String(20) // Authentication type (bearer or x-auth-key)
   created_at    DateTime       @default(now())
   updated_at    DateTime       @updatedAt
   field_mappings field_mappings[]

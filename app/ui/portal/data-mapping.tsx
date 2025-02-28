@@ -67,7 +67,6 @@ export default function DataMapping({ initialMapping }: DataMappingProps) {
 
   // API testing state
   const [testId, setTestId] = useState<string>('');
-  const [authType, setAuthType] = useState<'bearer' | 'x-auth-key'>('bearer');
   const [testResult, setTestResult] = useState<ApiTestResult | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -106,12 +105,7 @@ export default function DataMapping({ initialMapping }: DataMappingProps) {
     setTestResult(null);
 
     try {
-      const result = await testApiEndpoint(
-        mappingType,
-        endpoint,
-        testId,
-        authType,
-      );
+      const result = await testApiEndpoint(mappingType, endpoint, testId);
       setTestResult(result);
     } catch (error) {
       setTestResult({
@@ -290,31 +284,6 @@ export default function DataMapping({ initialMapping }: DataMappingProps) {
                 </div>
               </div>
 
-              <div>
-                <label
-                  htmlFor="authType"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Authentication Type
-                </label>
-                <div className="mt-1">
-                  <select
-                    id="authType"
-                    value={authType}
-                    onChange={(e) =>
-                      setAuthType(e.target.value as 'bearer' | 'x-auth-key')
-                    }
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  >
-                    <option value="bearer">Bearer Token</option>
-                    <option value="x-auth-key">X-Auth-Key Header</option>
-                  </select>
-                </div>
-                <p className="mt-1 text-xs text-gray-500">
-                  Select how your API key should be sent in the request
-                </p>
-              </div>
-
               <div className="flex justify-end">
                 <Button
                   type="button"
@@ -359,9 +328,8 @@ export default function DataMapping({ initialMapping }: DataMappingProps) {
                       </p>
                       <p className="text-xs text-gray-700">
                         <span className="font-medium">Authentication:</span>{' '}
-                        {authType === 'bearer'
-                          ? 'Bearer Token'
-                          : 'X-Auth-Key Header'}
+                        Using API configuration (check API Configuration
+                        section)
                       </p>
                       <p className="break-all text-xs text-gray-700">
                         <span className="font-medium">Endpoint:</span>{' '}
@@ -409,10 +377,41 @@ export default function DataMapping({ initialMapping }: DataMappingProps) {
                             {currentMapping.fields.map((field) => {
                               const ehrField = fieldMappings[field.name] || '';
 
-                              const value =
-                                ehrField && testResult.data
-                                  ? testResult.data[ehrField] || 'Not found'
-                                  : 'No mapping';
+                              // Handle nested paths like "patient.id" by splitting on dots
+                              let value = 'No mapping';
+
+                              if (ehrField && testResult.data) {
+                                if (ehrField.includes('.')) {
+                                  // Handle nested paths
+                                  const parts = ehrField.split('.');
+                                  let current = testResult.data;
+
+                                  // Navigate through the object path
+                                  for (const part of parts) {
+                                    if (
+                                      current &&
+                                      typeof current === 'object' &&
+                                      part in current
+                                    ) {
+                                      current = current[part];
+                                    } else {
+                                      current = undefined;
+                                      break;
+                                    }
+                                  }
+
+                                  value =
+                                    current !== undefined
+                                      ? current
+                                      : 'Not found';
+                                } else {
+                                  // Direct property access
+                                  value =
+                                    testResult.data[ehrField] !== undefined
+                                      ? testResult.data[ehrField]
+                                      : 'Not found';
+                                }
+                              }
 
                               return (
                                 <tr
