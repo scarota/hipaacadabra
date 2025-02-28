@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useActionState } from 'react';
 import { Button } from '@/app/ui/button';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
@@ -22,24 +22,17 @@ interface ApiKeyConfigProps {
 export default function ApiKeyConfig({ initialConfig }: ApiKeyConfigProps) {
   const [showApiKey, setShowApiKey] = useState(false);
   const [authType, setAuthType] = useState<string>(
-    initialConfig?.auth_type || 'bearer',
+    initialConfig?.auth_type || '',
   );
   const initialState: State = { message: null, errors: {} };
   const [state, dispatch] = useActionState(updatePortalApiConfig, initialState);
 
-  // Update state when the form is successfully submitted
-  useEffect(() => {
-    if (state.message && !state.errors) {
-      // Form was successfully submitted, update local state if needed
-      const formData = new FormData(
-        document.querySelector('form') as HTMLFormElement,
-      );
-      const newAuthType = formData.get('authType') as string;
-      if (newAuthType && newAuthType !== authType) {
-        setAuthType(newAuthType);
-      }
-    }
-  }, [state, authType]);
+  // Create a custom action that captures the current authType value
+  const handleSubmit = async (formData: FormData) => {
+    // Ensure the authType from state is used in the form submission
+    formData.set('authType', authType);
+    dispatch(formData);
+  };
 
   return (
     <div className="rounded-lg bg-white p-6 shadow">
@@ -48,7 +41,7 @@ export default function ApiKeyConfig({ initialConfig }: ApiKeyConfigProps) {
         Configure your API endpoint and authentication
       </p>
 
-      <form action={dispatch} className="mt-6 grid grid-cols-1 gap-6">
+      <form action={handleSubmit} className="mt-6 grid grid-cols-1 gap-6">
         <div>
           <label
             htmlFor="apiKey"
