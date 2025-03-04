@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import { useActionState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/app/ui/button';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { updatePortalApiConfig } from '@/app/lib/portal-actions';
@@ -20,20 +19,55 @@ interface ApiKeyConfigProps {
 }
 
 export default function ApiKeyConfig({ initialConfig }: ApiKeyConfigProps) {
+  // Form state
   const [showApiKey, setShowApiKey] = useState(false);
-  const [authType, setAuthType] = useState<string>(
-    initialConfig?.auth_type || '',
-  );
+  const [apiKey, setApiKey] = useState(initialConfig?.api_key || '');
+  const [baseUrl, setBaseUrl] = useState(initialConfig?.base_url || '');
+  const [authType, setAuthType] = useState(initialConfig?.auth_type || '');
 
-  const initialState: State = { message: null, errors: {} };
-  const [state, dispatch] = useActionState(updatePortalApiConfig, initialState);
+  // Form submission state
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formState, setFormState] = useState<State>({
+    message: null,
+    errors: {},
+  });
 
-  // Create a custom action that captures the current authType value
-  const handleSubmit = async (formData: FormData) => {
-    // Ensure the authType from state is used in the form submission
-    formData.set('authType', authType);
-    dispatch(formData);
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    setIsSubmitting(true);
+
+    try {
+      // Create FormData object
+      const formData = new FormData();
+      formData.append('apiKey', apiKey);
+      formData.append('baseUrl', baseUrl);
+      formData.append('authType', authType);
+
+      // Call the server action
+      const result = await updatePortalApiConfig(formState, formData);
+
+      // Update form state with the result
+      setFormState(result);
+    } catch (error) {
+      setFormState({
+        message: 'An unexpected error occurred',
+        errors: { apiKey: ['Failed to save configuration'] },
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  // Update state when initialConfig changes
+  useEffect(() => {
+    if (initialConfig) {
+      if (initialConfig.api_key) setApiKey(initialConfig.api_key);
+      if (initialConfig.base_url) setBaseUrl(initialConfig.base_url);
+      if (initialConfig.auth_type) setAuthType(initialConfig.auth_type);
+    }
+  }, [initialConfig]);
 
   return (
     <div className="rounded-lg bg-white p-6 shadow">
@@ -42,7 +76,7 @@ export default function ApiKeyConfig({ initialConfig }: ApiKeyConfigProps) {
         Configure your API endpoint and authentication
       </p>
 
-      <form action={handleSubmit} className="mt-6 grid grid-cols-1 gap-6">
+      <form onSubmit={handleSubmit} className="mt-6 grid grid-cols-1 gap-6">
         <div>
           <label
             htmlFor="apiKey"
@@ -56,7 +90,8 @@ export default function ApiKeyConfig({ initialConfig }: ApiKeyConfigProps) {
                 type={showApiKey ? 'text' : 'password'}
                 id="apiKey"
                 name="apiKey"
-                defaultValue={initialConfig?.api_key}
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
                 className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 placeholder="Enter your API key"
                 aria-describedby="apiKey-error"
@@ -74,9 +109,9 @@ export default function ApiKeyConfig({ initialConfig }: ApiKeyConfigProps) {
               </button>
             </div>
           </div>
-          {state.errors?.apiKey && (
+          {formState.errors?.apiKey && (
             <p className="mt-2 text-sm text-red-600" id="apiKey-error">
-              {state.errors.apiKey.join(', ')}
+              {formState.errors.apiKey.join(', ')}
             </p>
           )}
         </div>
@@ -92,14 +127,15 @@ export default function ApiKeyConfig({ initialConfig }: ApiKeyConfigProps) {
             type="text"
             id="baseUrl"
             name="baseUrl"
-            defaultValue={initialConfig?.base_url}
+            value={baseUrl}
+            onChange={(e) => setBaseUrl(e.target.value)}
             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             placeholder="https://api.yourprovider.com/v1"
             aria-describedby="baseUrl-error"
           />
-          {state.errors?.baseUrl && (
+          {formState.errors?.baseUrl && (
             <p className="mt-2 text-sm text-red-600" id="baseUrl-error">
-              {state.errors.baseUrl.join(', ')}
+              {formState.errors.baseUrl.join(', ')}
             </p>
           )}
         </div>
@@ -125,21 +161,23 @@ export default function ApiKeyConfig({ initialConfig }: ApiKeyConfigProps) {
           <p className="mt-1 text-xs text-gray-500">
             Select how your API key should be sent in the request
           </p>
-          {state.errors?.authType && (
+          {formState.errors?.authType && (
             <p className="mt-2 text-sm text-red-600" id="authType-error">
-              {state.errors.authType.join(', ')}
+              {formState.errors.authType.join(', ')}
             </p>
           )}
         </div>
 
-        {state.message && !state.errors && (
+        {formState.message && !formState.errors && (
           <div className="rounded-md bg-green-50 p-4">
-            <p className="text-sm text-green-700">{state.message}</p>
+            <p className="text-sm text-green-700">{formState.message}</p>
           </div>
         )}
 
         <div className="flex justify-end">
-          <Button type="submit">Save configuration</Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Saving...' : 'Save configuration'}
+          </Button>
         </div>
       </form>
     </div>
