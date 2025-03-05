@@ -230,7 +230,6 @@ export default function DataMapping({ initialMapping }: DataMappingProps) {
         <div className="w-full lg:w-1/2">
           <ApiTestOutput
             endpoint={endpoint}
-            mappingType={mappingType}
             fieldMappings={fieldMappings}
             currentMapping={currentMapping}
           />

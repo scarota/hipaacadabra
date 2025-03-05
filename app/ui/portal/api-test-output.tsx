@@ -8,7 +8,6 @@ import type { FieldDefinition } from '@/app/lib/field-mapping-constants';
 
 interface ApiTestOutputProps {
   endpoint: string;
-  mappingType: string;
   fieldMappings: Record<string, string>;
   currentMapping: {
     id: string;
@@ -20,7 +19,6 @@ interface ApiTestOutputProps {
 
 export default function ApiTestOutput({
   endpoint,
-  mappingType,
   fieldMappings,
   currentMapping,
 }: ApiTestOutputProps) {
@@ -33,7 +31,7 @@ export default function ApiTestOutput({
     setTestResult(null);
 
     try {
-      const result = await testApiEndpoint(mappingType, endpoint, testId);
+      const result = await testApiEndpoint(endpoint, testId);
       setTestResult(result);
     } catch (error) {
       setTestResult({

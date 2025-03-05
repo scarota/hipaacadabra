@@ -218,7 +218,6 @@ export type ApiTestResult = {
 };
 
 export async function testApiEndpoint(
-  mappingType: string,
   endpoint: string,
   testId?: string,
 ): Promise<ApiTestResult> {
