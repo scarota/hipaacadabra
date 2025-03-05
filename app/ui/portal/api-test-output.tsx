@@ -49,6 +49,16 @@ export default function ApiTestOutput({
     return JSON.stringify(data, null, 2);
   };
 
+  // Get the actual data to use for field mapping
+  const getDataForMapping = (data: any) => {
+    // If data is an array, use the first item
+    if (Array.isArray(data) && data.length > 0) {
+      return data[0];
+    }
+    // Otherwise use the data as is
+    return data;
+  };
+
   return (
     <div className="rounded-lg border border-gray-200 p-4">
       <h3 className="text-md font-medium text-gray-900">API Test</h3>
@@ -166,14 +176,17 @@ export default function ApiTestOutput({
                       {currentMapping.fields.map((field) => {
                         const ehrField = fieldMappings[field.name] || '';
 
+                        // Get the data to use for mapping (handle array responses)
+                        const mappingData = getDataForMapping(testResult.data);
+
                         // Handle nested paths like "patient.id" by splitting on dots
                         let value = 'No mapping';
 
-                        if (ehrField && testResult.data) {
+                        if (ehrField && mappingData) {
                           if (ehrField.includes('.')) {
                             // Handle nested paths
                             const parts = ehrField.split('.');
-                            let current = testResult.data;
+                            let current = mappingData;
 
                             // Navigate through the object path
                             for (const part of parts) {
@@ -190,13 +203,15 @@ export default function ApiTestOutput({
                             }
 
                             value =
-                              current !== undefined ? current : 'Not found';
+                              current !== undefined
+                                ? current
+                                : 'No value found';
                           } else {
                             // Direct property access
                             value =
-                              testResult.data[ehrField] !== undefined
-                                ? testResult.data[ehrField]
-                                : 'Not found';
+                              mappingData[ehrField] !== undefined
+                                ? mappingData[ehrField]
+                                : 'No value found';
                           }
                         }
 
