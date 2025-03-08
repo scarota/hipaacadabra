@@ -6,8 +6,8 @@ import { Button } from '@/app/ui/button';
 import {
   requestVerificationCode,
   verifyPatientCode,
-} from '@/app/lib/patient-actions';
-import type { PatientLoginState } from '@/app/lib/patient-actions';
+} from '@/app/lib/patient/patient-actions';
+import type { PatientLoginState } from '@/app/lib/patient/patient-actions';
 import { useRouter } from 'next/navigation';
 
 export default function PatientLoginForm() {
