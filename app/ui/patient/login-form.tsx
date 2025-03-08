@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useActionState } from 'react';
 import { Button } from '@/app/ui/button';
 import {
@@ -34,26 +34,41 @@ export default function PatientLoginForm() {
   // Determine which state to use based on the current step
   const currentState = step === 'email' ? state : verifyState;
 
-  // Handle successful verification
-  if (verifyState.success && verifyState.token && !verifyState.isLoading) {
-    // Store auth token and patient ID in localStorage
-    localStorage.setItem('patientToken', verifyState.token);
-    if (patientId) {
-      localStorage.setItem('patientId', patientId);
+  // Handle successful verification with useEffect
+  useEffect(() => {
+    if (verifyState.success && verifyState.token && !verifyState.isLoading) {
+      // Store auth token and patient ID in localStorage
+      localStorage.setItem('patientToken', verifyState.token);
+      if (patientId) {
+        localStorage.setItem('patientId', patientId);
+      }
+
+      // Redirect to patient main page
+      router.push('/patient');
     }
+  }, [
+    verifyState.success,
+    verifyState.token,
+    verifyState.isLoading,
+    patientId,
+    router,
+  ]);
 
-    // Redirect to patient main page
-    router.push('/patient');
-  }
+  // Handle successful code request with useEffect
+  useEffect(() => {
+    if (
+      state.success &&
+      state.patient &&
+      step === 'email' &&
+      !state.isLoading
+    ) {
+      // Store patient ID for later use
+      setPatientId(state.patient.id);
 
-  // Handle successful code request
-  if (state.success && state.patient && step === 'email' && !state.isLoading) {
-    // Store patient ID for later use
-    setPatientId(state.patient.id);
-
-    // Move to verification step
-    setStep('verify');
-  }
+      // Move to verification step
+      setStep('verify');
+    }
+  }, [state.success, state.patient, state.isLoading, step]);
 
   // Handle form submission for verification code
   const handleVerifySubmit = (formData: FormData) => {
