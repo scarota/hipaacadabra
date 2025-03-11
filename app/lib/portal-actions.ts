@@ -6,6 +6,7 @@ import { PrismaClient } from '@prisma/client';
 import { getUserOrganization } from '@/app/lib/kinde-data';
 import { encrypt, decrypt } from '@/app/lib/encryption';
 import { DATA_MAPPINGS } from '@/app/lib/field-mapping-constants';
+import { createAuthHeaders } from '@/app/lib/utils';
 
 export type State = {
   message: string | null;
@@ -264,17 +265,8 @@ export async function testApiEndpoint(
     // Record start time for performance measurement
     const startTime = Date.now();
 
-    // Set up headers based on authentication type
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-
-    // Add authentication header based on selected type
-    if (authType === 'bearer') {
-      headers['Authorization'] = `Bearer ${apiKey}`;
-    } else if (authType === 'x-auth-key') {
-      headers['X-Auth-Key'] = apiKey;
-    }
+    // Create headers with proper authentication
+    const headers = createAuthHeaders(apiKey, authType);
 
     // Make the API request
     const response = await fetch(url, {
@@ -304,10 +296,10 @@ export async function testApiEndpoint(
       duration,
     };
   } catch (error) {
-    console.error('API Test Error:', error);
+    console.error('Error testing API endpoint:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred',
+      error: `Error testing API endpoint: ${error instanceof Error ? error.message : String(error)}`,
     };
   }
 }

@@ -4,7 +4,7 @@ import {
   MapPinIcon,
   UserIcon,
 } from '@heroicons/react/24/outline';
-import { fetchPatientAppointments } from '@/app/lib/patient-data';
+import { fetchPatientAppointments } from '@/app/lib/patient/patient-actions';
 
 export const metadata: Metadata = {
   title: 'Appointments',

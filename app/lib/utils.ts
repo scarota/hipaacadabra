@@ -1,6 +1,11 @@
 import { Revenue } from './definitions';
 
-// Date formatting utilities
+/**
+ * Formats a date string to a localized format
+ * @param dateStr The date string to format
+ * @param locale The locale to use for formatting (defaults to 'en-US')
+ * @returns A formatted date string in the specified locale
+ */
 export const formatDateToLocal = (
   dateStr: string,
   locale: string = 'en-US',
@@ -15,6 +20,11 @@ export const formatDateToLocal = (
   return formatter.format(date);
 };
 
+/**
+ * Formats a number as currency
+ * @param amount The amount to format as currency
+ * @returns A formatted currency string in USD
+ */
 export const formatCurrency = (amount: number) => {
   return (amount / 100).toLocaleString('en-US', {
     style: 'currency',
@@ -22,6 +32,11 @@ export const formatCurrency = (amount: number) => {
   });
 };
 
+/**
+ * Generates Y-axis values for a revenue chart
+ * @param revenue Array of revenue data points
+ * @returns An array of Y-axis values for the chart
+ */
 export const generateYAxis = (revenue: Revenue[]) => {
   // Calculate what labels we need to display on the y-axis
   // based on highest record and in 1000s
@@ -68,3 +83,28 @@ export const generatePagination = (currentPage: number, totalPages: number) => {
     totalPages,
   ];
 };
+
+/**
+ * Creates authentication headers for API requests based on the API configuration
+ * @param apiKey The API key to use for authentication
+ * @param authType The authentication type ('bearer' or 'x-auth-key')
+ * @returns An object containing the appropriate authentication headers
+ */
+export function createAuthHeaders(
+  apiKey: string,
+  authType: string,
+): Record<string, string> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  // Add authentication header based on selected type
+  if (authType === 'bearer') {
+    headers['Authorization'] = `Bearer ${apiKey}`;
+  } else if (authType === 'x-auth-key') {
+    headers['X-Auth-Key'] = apiKey;
+  }
+  // Add other auth types as needed
+
+  return headers;
+}

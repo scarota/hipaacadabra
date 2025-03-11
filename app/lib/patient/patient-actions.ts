@@ -5,6 +5,7 @@ import { getFieldMappingByType } from '@/app/lib/portal-data';
 import { PATIENT_MAPPING } from '@/app/lib/field-mapping-constants';
 import { getPortalApiConfig } from '@/app/lib/portal-data';
 import { revalidatePath } from 'next/cache';
+import { createAuthHeaders } from '@/app/lib/utils';
 
 // Define validation schemas
 const PatientEmailSchema = z.object({
@@ -117,12 +118,19 @@ export async function verifyPatientCode(
     console.log('Verifying code for email:', validatedEmail);
     console.log('Entered code:', validatedCode);
 
-    // Accept any code for testing purposes
-    return {
-      success: true,
-      message: 'Verification successful',
-      token: 'mock-auth-token-123456',
-    };
+    // For testing purposes, accept code 123456
+    if (validatedCode === '123456') {
+      return {
+        success: true,
+        message: 'Verification successful',
+        token: 'mock-auth-token-123456',
+      };
+    } else {
+      return {
+        success: false,
+        message: 'Invalid verification code. Please try again.',
+      };
+    }
   } catch (error) {
     console.error('Error verifying code:', error);
     return {
@@ -172,30 +180,116 @@ async function lookupPatientByEmail(email: string): Promise<{
       };
     }
 
-    // Log the request details
-    console.log('Patient mapping endpoint:', endpoint);
-    console.log('Looking up patient with email:', email);
+    // Replace {id} in the endpoint with the email
+    const actualEndpoint = endpoint.replace('{id}', encodeURIComponent(email));
+    const url = `${apiConfig.base_url}${actualEndpoint}`;
 
-    // In a real implementation, we would:
-    // 1. Replace {id} in the endpoint with the email
-    // 2. Make an API request to the configured base URL + endpoint
-    // 3. Parse the response using the field mappings
+    console.log(`Making API request to: ${url}`);
 
-    // For testing, just log what we would do
-    const actualEndpoint = endpoint.replace('{id}', email);
-    console.log(
-      `Would make request to: ${apiConfig.base_url}${actualEndpoint}`,
-    );
+    // Create headers with proper authentication
+    const headers = createAuthHeaders(apiConfig.api_key, apiConfig.auth_type);
 
-    // Return mock data for testing
+    // Make the API request
+    const response = await fetch(url, {
+      method: 'GET',
+      headers,
+    });
+
+    if (!response.ok) {
+      console.error(`API request failed with status: ${response.status}`);
+
+      // Handle specific error cases
+      if (response.status === 404) {
+        return {
+          success: false,
+          message: 'No patient found with this email address.',
+        };
+      }
+
+      return {
+        success: false,
+        message: `API request failed with status: ${response.status}`,
+      };
+    }
+
+    // Parse the response
+    const data = await response.json();
+    console.log('API response:', data);
+
+    // Get the mappings
+    const mappings = patientMapping.mappings as Record<string, string>;
+    console.log('Field mappings:', mappings);
+
+    // Find which portal field is mapped to the email field
+    // We need to find the key in mappings where the value is the field name in the API response
+    // that contains the email
+    let emailField = null;
+
+    // First, try to find a field explicitly named 'email' in the mappings
+    for (const [portalField, apiField] of Object.entries(mappings)) {
+      if (portalField.toLowerCase() === 'email') {
+        emailField = apiField;
+        break;
+      }
+    }
+
+    // // If we didn't find an explicit email field, look for common email field names
+    // if (!emailField) {
+    //   const commonEmailFields = ['email', 'emailaddress', 'mail', 'usermail', 'useremail'];
+    //   for (const [portalField, apiField] of Object.entries(mappings)) {
+    //     if (commonEmailFields.includes(apiField.toLowerCase())) {
+    //       emailField = apiField;
+    //       break;
+    //     }
+    //   }
+    // }
+
+    console.log('Identified email field in API response:', emailField);
+
+    if (!emailField || !data[emailField]) {
+      console.error('Email field not found in API response or mapping');
+      console.log('Available fields in response:', Object.keys(data));
+      return {
+        success: false,
+        message:
+          'Email field not found in API response. Please check your field mappings.',
+      };
+    }
+
+    // Verify that the email in the response matches the email we provided
+    const responseEmail = data[emailField].toString().toLowerCase();
+    const requestEmail = email.toLowerCase();
+
+    if (responseEmail !== requestEmail) {
+      console.error(
+        `Email mismatch: requested ${requestEmail} but got ${responseEmail}`,
+      );
+      return {
+        success: false,
+        message: 'Email mismatch in API response.',
+      };
+    }
+
+    // Map the response to our patient object using the field mappings
+    const patient = {
+      id: data[mappings.id || 'id'] || '',
+      email: responseEmail,
+      firstName: data[mappings.firstName || 'firstName'] || '',
+      lastName: data[mappings.lastName || 'lastName'] || '',
+    };
+
+    // Validate that we have an ID
+    if (!patient.id) {
+      console.error('Patient ID not found in API response');
+      return {
+        success: false,
+        message: 'Invalid patient data received from API.',
+      };
+    }
+
     return {
       success: true,
-      patient: {
-        id: 'patient-123',
-        email: email,
-        firstName: 'Test',
-        lastName: 'Patient',
-      },
+      patient,
     };
   } catch (error) {
     console.error('Error getting patient by email:', error);
@@ -204,4 +298,48 @@ async function lookupPatientByEmail(email: string): Promise<{
       message: 'An error occurred while looking up patient information.',
     };
   }
+}
+
+/**
+ * Fetch appointments for a patient
+ * @param patientId The ID of the patient to fetch appointments for
+ * @returns An array of appointment objects
+ */
+export async function fetchPatientAppointments(patientId: string) {
+  // This is a mock implementation - in a real app, you would fetch from an API
+  console.log(`Fetching appointments for patient: ${patientId}`);
+
+  // Return mock data
+  return [
+    {
+      id: 'apt-1',
+      type: 'Cardiology Consultation',
+      provider: 'Dr. Jane Smith',
+      date: 'December 15, 2023',
+      time: '9:00 AM',
+      location: 'Main Clinic, Room 302',
+      status: 'scheduled',
+      notes: 'Follow-up appointment',
+    },
+    {
+      id: 'apt-2',
+      type: 'Dermatology Check-up',
+      provider: 'Dr. Michael Johnson',
+      date: 'December 20, 2023',
+      time: '2:30 PM',
+      location: 'North Branch, Room 105',
+      status: 'scheduled',
+      notes: 'Annual skin check',
+    },
+    {
+      id: 'apt-3',
+      type: 'General Check-up',
+      provider: 'Dr. Sarah Williams',
+      date: 'November 10, 2023',
+      time: '10:15 AM',
+      location: 'Main Clinic, Room 101',
+      status: 'completed',
+      notes: 'Regular check-up',
+    },
+  ];
 }
