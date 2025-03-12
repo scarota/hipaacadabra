@@ -145,6 +145,13 @@ export default function PatientLoginForm() {
         </form>
       ) : (
         <form action={handleVerifySubmit} className="space-y-6">
+          <div className="mb-4 rounded-md bg-blue-50 p-4 text-blue-700">
+            <p className="text-sm">
+              If the email is registered, a verification code has been sent.
+              Please check your inbox and enter the code below.
+            </p>
+          </div>
+
           <div>
             <label
               htmlFor="code"

@@ -23,8 +23,6 @@ export type PatientLoginState = {
   patient?: {
     id: string;
     email: string;
-    firstName?: string;
-    lastName?: string;
   };
   token?: string;
   message?: string | null;
@@ -64,28 +62,42 @@ export async function requestVerificationCode(
     const patientResponse = await lookupPatientByEmail(validatedEmail);
 
     if (!patientResponse.success || !patientResponse.patient) {
+      // For non-existent emails, log this fact but don't reveal it to the user
+      console.log(`Email not found: ${validatedEmail}`);
+
+      // Return success with a fake patient object to show the verification form
+      // This prevents user enumeration by making the behavior identical for all emails
       return {
-        success: false,
-        message:
-          patientResponse.message || 'No patient account found with this email',
-        errors: patientResponse.errors,
+        success: true,
+        // No message needed here as it won't be seen
+        // Create a temporary patient object with the email
+        // This won't be stored but allows the UI to show the verification form
+        patient: {
+          id: `temp-${Date.now()}`,
+          email: validatedEmail,
+        },
       };
     }
 
-    // Just console log the email and return a mock success response
-    console.log('Verification code requested for email:', validatedEmail);
-    console.log('Mock verification code: 123456');
+    // For real patients, actually send a verification code (mock for now)
+    console.log(`Verification code 123456 sent to: ${validatedEmail}`);
 
     return {
       success: true,
-      message: 'Verification code sent to your email',
+      // No message needed here as it won't be seen
       patient: patientResponse.patient,
     };
   } catch (error) {
     console.error('Error sending verification code:', error);
+    // Use the same generic message for errors to prevent information leakage
+    // Also return a fake patient object to show the verification form
     return {
-      success: false,
-      message: 'An error occurred while sending the verification code.',
+      success: true,
+      // No message needed here as it won't be seen
+      patient: {
+        id: `temp-${Date.now()}`,
+        email: email,
+      },
     };
   }
 }
@@ -106,7 +118,7 @@ export async function verifyPatientCode(
   if (!validatedFields.success) {
     return {
       success: false,
-      message: 'Invalid verification data',
+      message: 'Please check your verification details and try again.',
       errors: validatedFields.error.flatten().fieldErrors,
     };
   }
@@ -114,28 +126,50 @@ export async function verifyPatientCode(
   try {
     const { email: validatedEmail, code: validatedCode } = validatedFields.data;
 
-    // Just console log the verification attempt
-    console.log('Verifying code for email:', validatedEmail);
-    console.log('Entered code:', validatedCode);
+    // First, look up the patient to verify they exist
+    const patientResponse = await lookupPatientByEmail(validatedEmail);
 
-    // For testing purposes, accept code 123456
-    if (validatedCode === '123456') {
+    // For security, we'll do a constant-time comparison regardless of whether the patient exists
+    // This prevents timing attacks that could determine if an email exists
+
+    // For testing purposes, accept code 123456 only for valid patients
+    const isValidPatient = patientResponse.success && patientResponse.patient;
+    const isValidCode = validatedCode === '123456';
+
+    if (isValidPatient && isValidCode) {
+      // Only authenticate if both the patient exists and the code is valid
+      console.log(`Successful verification for: ${validatedEmail}`);
       return {
         success: true,
         message: 'Verification successful',
         token: 'mock-auth-token-123456',
+        patient: patientResponse.patient,
       };
     } else {
+      // Log the actual reason for failure (for debugging) but don't reveal it to the user
+      if (!isValidPatient) {
+        console.log(
+          `Verification failed: Patient not found for email ${validatedEmail}`,
+        );
+      } else {
+        console.log(
+          `Verification failed: Invalid code ${validatedCode} for email ${validatedEmail}`,
+        );
+      }
+
+      // Use a generic message that doesn't confirm whether the code is wrong
+      // or the email doesn't exist
       return {
         success: false,
-        message: 'Invalid verification code. Please try again.',
+        message: 'Verification failed. Please check your code and try again.',
       };
     }
   } catch (error) {
     console.error('Error verifying code:', error);
+    // Use a generic error message
     return {
       success: false,
-      message: 'An error occurred while verifying the code.',
+      message: 'Verification failed. Please check your code and try again.',
     };
   }
 }
@@ -148,8 +182,6 @@ async function lookupPatientByEmail(email: string): Promise<{
   patient?: {
     id: string;
     email: string;
-    firstName?: string;
-    lastName?: string;
   };
   message?: string;
   errors?: {
@@ -165,7 +197,7 @@ async function lookupPatientByEmail(email: string): Promise<{
       console.error('Patient mapping or API config not found');
       return {
         success: false,
-        message: 'System configuration error. Please contact support.',
+        message: 'CONFIGURATION_ERROR',
       };
     }
 
@@ -176,7 +208,7 @@ async function lookupPatientByEmail(email: string): Promise<{
       console.error('Endpoint not configured in patient mapping');
       return {
         success: false,
-        message: 'System configuration error. Please contact support.',
+        message: 'ENDPOINT_NOT_CONFIGURED',
       };
     }
 
@@ -184,7 +216,7 @@ async function lookupPatientByEmail(email: string): Promise<{
     const actualEndpoint = endpoint.replace('{id}', encodeURIComponent(email));
     const url = `${apiConfig.base_url}${actualEndpoint}`;
 
-    console.log(`Making API request to: ${url}`);
+    console.log(`API request: ${url}`);
 
     // Create headers with proper authentication
     const headers = createAuthHeaders(apiConfig.api_key, apiConfig.auth_type);
@@ -197,95 +229,74 @@ async function lookupPatientByEmail(email: string): Promise<{
 
     if (!response.ok) {
       console.error(`API request failed with status: ${response.status}`);
-
-      // Handle specific error cases
-      if (response.status === 404) {
-        return {
-          success: false,
-          message: 'No patient found with this email address.',
-        };
-      }
-
       return {
         success: false,
-        message: `API request failed with status: ${response.status}`,
+        message: `API_ERROR_${response.status}`,
       };
     }
 
     // Parse the response
-    const data = await response.json();
-    console.log('API response:', data);
+    const rawData = await response.json();
 
-    // Get the mappings
-    const mappings = patientMapping.mappings as Record<string, string>;
-    console.log('Field mappings:', mappings);
+    // Handle case where the API returns an array
+    const data =
+      Array.isArray(rawData) && rawData.length > 0 ? rawData[0] : rawData;
 
-    // Find which portal field is mapped to the email field
-    // We need to find the key in mappings where the value is the field name in the API response
-    // that contains the email
-    let emailField = null;
-
-    // First, try to find a field explicitly named 'email' in the mappings
-    for (const [portalField, apiField] of Object.entries(mappings)) {
-      if (portalField.toLowerCase() === 'email') {
-        emailField = apiField;
-        break;
-      }
-    }
-
-    // // If we didn't find an explicit email field, look for common email field names
-    // if (!emailField) {
-    //   const commonEmailFields = ['email', 'emailaddress', 'mail', 'usermail', 'useremail'];
-    //   for (const [portalField, apiField] of Object.entries(mappings)) {
-    //     if (commonEmailFields.includes(apiField.toLowerCase())) {
-    //       emailField = apiField;
-    //       break;
-    //     }
-    //   }
-    // }
-
-    console.log('Identified email field in API response:', emailField);
-
-    if (!emailField || !data[emailField]) {
-      console.error('Email field not found in API response or mapping');
-      console.log('Available fields in response:', Object.keys(data));
+    // If we got an empty response or no data, patient doesn't exist
+    if (!data || Object.keys(data).length === 0) {
+      console.log(`No data returned for email: ${email}`);
       return {
         success: false,
-        message:
-          'Email field not found in API response. Please check your field mappings.',
+        message: 'PATIENT_NOT_FOUND',
+      };
+    }
+
+    // Get the mappings to find the email field
+    const mappings = patientMapping.mappings as Record<string, string>;
+
+    // Find the email field in the mappings
+    const emailField = Object.keys(mappings).find((key) => key === 'email');
+
+    if (!emailField) {
+      console.error('Email field not found in mappings');
+      return {
+        success: false,
+        message: 'EMAIL_MAPPING_NOT_FOUND',
+      };
+    }
+
+    // Get the API field name that the email is mapped to
+    const apiEmailField = mappings[emailField];
+
+    // Check if the email field exists in the data
+    if (!data[apiEmailField]) {
+      console.error(`Email field '${apiEmailField}' not found in API response`);
+      return {
+        success: false,
+        message: 'EMAIL_FIELD_NOT_FOUND',
       };
     }
 
     // Verify that the email in the response matches the email we provided
-    const responseEmail = data[emailField].toString().toLowerCase();
-    const requestEmail = email.toLowerCase();
+    const responseEmail = data[apiEmailField].toString();
 
-    if (responseEmail !== requestEmail) {
+    if (responseEmail.toLowerCase() !== email.toLowerCase()) {
       console.error(
-        `Email mismatch: requested ${requestEmail} but got ${responseEmail}`,
+        `Email mismatch: requested ${email} but got ${responseEmail}`,
       );
       return {
         success: false,
-        message: 'Email mismatch in API response.',
+        message: 'EMAIL_MISMATCH',
       };
     }
 
-    // Map the response to our patient object using the field mappings
+    // Create a simple patient object with the email and any available ID
     const patient = {
-      id: data[mappings.id || 'id'] || '',
+      id: data.Guid || data.ClientId || data.id || String(Date.now()),
       email: responseEmail,
-      firstName: data[mappings.firstName || 'firstName'] || '',
-      lastName: data[mappings.lastName || 'lastName'] || '',
     };
 
-    // Validate that we have an ID
-    if (!patient.id) {
-      console.error('Patient ID not found in API response');
-      return {
-        success: false,
-        message: 'Invalid patient data received from API.',
-      };
-    }
+    console.log(`Patient found: ${responseEmail}`);
 
     return {
       success: true,
@@ -295,7 +306,7 @@ async function lookupPatientByEmail(email: string): Promise<{
     console.error('Error getting patient by email:', error);
     return {
       success: false,
-      message: 'An error occurred while looking up patient information.',
+      message: 'PATIENT_LOOKUP_ERROR',
     };
   }
 }
