@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { useActionState } from 'react';
 import { Button } from '@/app/ui/button';
 import {
@@ -25,11 +25,12 @@ export default function PatientLoginForm() {
   const [verificationCode, setVerificationCode] = useState('');
   const [step, setStep] = useState<'email' | 'verify'>('email');
   const [patientId, setPatientId] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const router = useRouter();
 
   // Track if we're in the loading state
-  const isLoading = state.isLoading || verifyState.isLoading;
+  const isLoading = state.isLoading || verifyState.isLoading || isPending;
 
   // Determine which state to use based on the current step
   const currentState = step === 'email' ? state : verifyState;
@@ -81,16 +82,16 @@ export default function PatientLoginForm() {
     dispatch(formData);
   };
 
-  // Handle going back to email step
-  const handleBackToEmail = () => {
-    setStep('email');
-  };
-
   // Handle resending verification code
   const handleResendCode = () => {
+    console.log('Resending code for email:', email);
     const formData = new FormData();
     formData.append('email', email);
-    dispatch(formData);
+
+    // Use startTransition to properly handle the server action
+    startTransition(() => {
+      dispatch(formData);
+    });
   };
 
   return (
@@ -179,14 +180,7 @@ export default function PatientLoginForm() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <button
-              type="button"
-              onClick={handleBackToEmail}
-              className="text-sm font-medium text-blue-600 hover:text-blue-500"
-            >
-              Back to email
-            </button>
+          <div className="flex justify-end">
             <button
               type="button"
               onClick={handleResendCode}
