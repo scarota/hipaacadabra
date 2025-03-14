@@ -4,7 +4,6 @@ import { z } from 'zod';
 import { getFieldMappingByType } from '@/app/lib/portal-data';
 import { PATIENT_MAPPING } from '@/app/lib/field-mapping-constants';
 import { getPortalApiConfig } from '@/app/lib/portal-data';
-import { revalidatePath } from 'next/cache';
 import { createAuthHeaders } from '@/app/lib/utils';
 
 // Define validation schemas
