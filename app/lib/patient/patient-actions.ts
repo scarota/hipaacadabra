@@ -209,8 +209,11 @@ async function lookupPatientByEmail(email: string): Promise<{
       };
     }
 
-    // Replace {id} in the endpoint with the email
-    const actualEndpoint = endpoint.replace('{id}', encodeURIComponent(email));
+    // Replace {email} in the endpoint with the email
+    const actualEndpoint = endpoint.replace(
+      '{email}',
+      encodeURIComponent(email),
+    );
     const url = `${apiConfig.base_url}${actualEndpoint}`;
 
     console.log(`API request: ${url}`);

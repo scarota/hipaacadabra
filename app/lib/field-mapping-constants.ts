@@ -28,7 +28,7 @@ export const PATIENT_MAPPING: DataMapping = {
   id: 'patient',
   name: 'Patient Mapping',
   description: 'Map EHR patients to portal users',
-  endpoint: '/patients/{id}',
+  endpoint: '/patients/{email}',
   fields: [
     {
       name: 'ehrPatientId',

@@ -216,13 +216,33 @@ export type ApiTestResult = {
   error?: string;
   status?: number;
   duration?: number;
+  recordCount?: number;
 };
 
 export async function testApiEndpoint(
   endpoint: string,
-  testId?: string,
+  testEmail?: string,
 ): Promise<ApiTestResult> {
   try {
+    // Check if email is provided
+    if (!testEmail || testEmail.trim() === '') {
+      return {
+        success: false,
+        error: 'Email is required. Please provide a valid email address.',
+      };
+    }
+
+    // Validate email format
+    const emailSchema = z.string().email('Invalid email format');
+    const emailValidation = emailSchema.safeParse(testEmail);
+
+    if (!emailValidation.success) {
+      return {
+        success: false,
+        error: 'Invalid email format. Please provide a valid email address.',
+      };
+    }
+
     const prisma = new PrismaClient();
     const org = await getUserOrganization();
 
@@ -254,9 +274,9 @@ export async function testApiEndpoint(
     // Get the authentication type from the API config
     const authType = apiConfig.auth_type;
 
-    // Format the endpoint with the test ID if provided
-    const formattedEndpoint = testId
-      ? endpoint.replace('{id}', testId)
+    // Format the endpoint with the test email if provided
+    const formattedEndpoint = testEmail
+      ? endpoint.replace('{email}', testEmail)
       : endpoint;
 
     // Construct the full URL
@@ -289,11 +309,15 @@ export async function testApiEndpoint(
 
     const data = await response.json();
 
+    // Count and log the number of records for debugging
+    const recordCount = Array.isArray(data) ? data.length : 1;
+
     return {
       success: true,
       data,
       status: response.status,
       duration,
+      recordCount,
     };
   } catch (error) {
     console.error('Error testing API endpoint:', error);

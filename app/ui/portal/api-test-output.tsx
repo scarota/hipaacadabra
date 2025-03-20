@@ -22,16 +22,18 @@ export default function ApiTestOutput({
   fieldMappings,
   currentMapping,
 }: ApiTestOutputProps) {
-  const [testId, setTestId] = useState<string>('');
+  const [testEmail, setTestEmail] = useState<string>('');
   const [testResult, setTestResult] = useState<ApiTestResult | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleTestApiCall = async () => {
+    // The validation is now handled by the native HTML form validation
+
     setIsLoading(true);
     setTestResult(null);
 
     try {
-      const result = await testApiEndpoint(endpoint, testId);
+      const result = await testApiEndpoint(endpoint, testEmail);
       setTestResult(result);
     } catch (error) {
       setTestResult({
@@ -63,38 +65,44 @@ export default function ApiTestOutput({
     <div className="rounded-lg border border-gray-200 p-4">
       <h3 className="text-md font-medium text-gray-900">API Test</h3>
       <p className="mt-1 text-sm text-gray-500">
-        Test your API endpoint with a sample ID
+        Test your API endpoint with a valid email address
       </p>
 
       <div className="mt-4 space-y-4">
-        <div>
-          <label
-            htmlFor="testId"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Test ID (replaces {'{id}'} in endpoint)
-          </label>
-          <div className="mt-1">
-            <input
-              type="text"
-              id="testId"
-              value={testId}
-              onChange={(e) => setTestId(e.target.value)}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-              placeholder="Enter an ID to test"
-            />
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleTestApiCall();
+          }}
+          className="space-y-4"
+        >
+          <div>
+            <label
+              htmlFor="testEmail"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Test Email (replaces {'{email}'} in endpoint)
+            </label>
+            <div className="mt-1">
+              <input
+                type="email"
+                id="testEmail"
+                value={testEmail}
+                onChange={(e) => setTestEmail(e.target.value)}
+                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                placeholder="Enter an email to test"
+                autoComplete="email"
+                required
+              />
+            </div>
           </div>
-        </div>
 
-        <div className="flex justify-end">
-          <Button
-            type="button"
-            onClick={handleTestApiCall}
-            disabled={isLoading}
-          >
-            {isLoading ? 'Testing...' : 'Test API Call'}
-          </Button>
-        </div>
+          <div className="flex justify-end">
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? 'Testing...' : 'Test API Call'}
+            </Button>
+          </div>
+        </form>
 
         {/* Test Results */}
         {testResult && (
@@ -106,7 +114,20 @@ export default function ApiTestOutput({
                   <p className="text-sm text-green-700">
                     Success! Status: {testResult.status}, Time:{' '}
                     {testResult.duration}ms
+                    {testResult.recordCount !== undefined && (
+                      <span>, Records: {testResult.recordCount}</span>
+                    )}
                   </p>
+
+                  {/* Warning for multiple records */}
+                  {testResult.recordCount && testResult.recordCount > 1 && (
+                    <p className="mt-2 rounded-md border border-yellow-200 bg-yellow-50 p-2 text-sm text-yellow-600">
+                      <strong>Warning:</strong> Multiple records returned. The
+                      patient mapping endpoint should typically return only a
+                      single record for an email. This may indicate an issue
+                      with your API endpoint configuration.
+                    </p>
+                  )}
                 </div>
               ) : (
                 <div className="rounded-md bg-red-50 p-2">
@@ -132,7 +153,7 @@ export default function ApiTestOutput({
                 </p>
                 <p className="break-all text-xs text-gray-700">
                   <span className="font-medium">Endpoint:</span>{' '}
-                  {endpoint.replace('{id}', testId || '{id}')}
+                  {endpoint.replace('{email}', testEmail || '{email}')}
                 </p>
               </div>
             </div>
