@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { Button } from '@/app/ui/button';
-import { testApiEndpoint } from '@/app/lib/portal-actions';
-import type { ApiTestResult } from '@/app/lib/portal-actions';
+import { testApiEndpoint } from '@/app/lib/portal-data';
+import type { ApiTestResult } from '@/app/lib/portal-data';
 import type { FieldDefinition } from '@/app/lib/field-mapping-constants';
 
 interface ApiTestOutputProps {
