@@ -1,3 +1,8 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { isPatientAuthenticated } from '@/app/lib/patient/auth-utils';
 import PatientTopNav from '@/app/ui/patient/patient-topnav';
 
 export default function PatientPortalLayout({
@@ -5,6 +10,47 @@ export default function PatientPortalLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    // Check if the user is authenticated
+    const authenticated = isPatientAuthenticated();
+    setIsAuthenticated(authenticated);
+
+    // If not authenticated and not on the login page, redirect to login
+    if (
+      !authenticated &&
+      !window.location.pathname.includes('/patient/login')
+    ) {
+      router.push('/patient/login');
+    } else {
+      setIsLoading(false);
+    }
+  }, [router]);
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-blue-500"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If on a protected page and not authenticated, don't render children
+  // This is a fallback in case the middleware redirect fails
+  if (
+    !isAuthenticated &&
+    !window.location.pathname.includes('/patient/login')
+  ) {
+    return null;
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       <PatientTopNav />

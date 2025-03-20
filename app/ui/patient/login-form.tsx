@@ -26,26 +26,42 @@ export default function PatientLoginForm() {
   const [step, setStep] = useState<'email' | 'verify'>('email');
   const [patientId, setPatientId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [redirecting, setRedirecting] = useState(false);
 
   const router = useRouter();
 
   // Track if we're in the loading state
-  const isLoading = state.isLoading || verifyState.isLoading || isPending;
+  const isLoading =
+    state.isLoading || verifyState.isLoading || isPending || redirecting;
 
   // Determine which state to use based on the current step
   const currentState = step === 'email' ? state : verifyState;
 
   // Handle successful verification with useEffect
   useEffect(() => {
-    if (verifyState.success && verifyState.token && !verifyState.isLoading) {
-      // Store auth token and patient ID in localStorage
-      localStorage.setItem('patientToken', verifyState.token);
+    if (
+      verifyState.success &&
+      verifyState.token &&
+      !verifyState.isLoading &&
+      !redirecting
+    ) {
+      // Store patient ID in localStorage for convenience
       if (patientId) {
         localStorage.setItem('patientId', patientId);
       }
 
-      // Redirect to patient main page
-      router.push('/patient');
+      // Set the token in a cookie (will be handled by the server)
+      // The cookie will be automatically sent with subsequent requests
+      document.cookie = `patient_token=${verifyState.token}; path=/; max-age=86400; SameSite=Strict`;
+
+      // Set redirecting state to show loading and prevent multiple redirects
+      setRedirecting(true);
+
+      // Delay redirect to show success message
+      setTimeout(() => {
+        // Redirect to patient main page
+        router.push('/patient');
+      }, 1500); // 1.5 second delay
     }
   }, [
     verifyState.success,
@@ -53,6 +69,7 @@ export default function PatientLoginForm() {
     verifyState.isLoading,
     patientId,
     router,
+    redirecting,
   ]);
 
   // Handle successful code request with useEffect
@@ -192,7 +209,11 @@ export default function PatientLoginForm() {
 
           <div>
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Verifying...' : 'Verify & Sign In'}
+              {isLoading
+                ? redirecting
+                  ? 'Signing in...'
+                  : 'Verifying...'
+                : 'Verify & Sign In'}
             </Button>
           </div>
         </form>

@@ -5,6 +5,7 @@ import { getFieldMappingByType } from '@/app/lib/portal-data';
 import { PATIENT_MAPPING } from '@/app/lib/field-mapping-constants';
 import { getPortalApiConfig } from '@/app/lib/portal-data';
 import { createAuthHeaders } from '@/app/lib/utils';
+import { generateAuthToken } from '@/app/lib/patient/auth-utils';
 
 // Define validation schemas
 const PatientEmailSchema = z.object({
@@ -16,7 +17,6 @@ const PatientVerificationSchema = z.object({
   code: z.string().min(4, 'Verification code must be at least 4 characters'),
 });
 
-// Define state types
 export type PatientLoginState = {
   success?: boolean;
   patient?: {
@@ -32,9 +32,6 @@ export type PatientLoginState = {
   isLoading?: boolean;
 };
 
-/**
- * Request a verification code for patient login
- */
 export async function requestVerificationCode(
   prevState: PatientLoginState,
   formData: FormData,
@@ -101,9 +98,6 @@ export async function requestVerificationCode(
   }
 }
 
-/**
- * Verify a patient login code
- */
 export async function verifyPatientCode(
   prevState: PatientLoginState,
   formData: FormData,
@@ -138,10 +132,17 @@ export async function verifyPatientCode(
     if (isValidPatient && isValidCode) {
       // Only authenticate if both the patient exists and the code is valid
       console.log(`Successful verification for: ${validatedEmail}`);
+
+      // Generate a more realistic token
+      const token = generateAuthToken(
+        patientResponse.patient!.id,
+        validatedEmail,
+      );
+
       return {
         success: true,
         message: 'Verification successful',
-        token: 'mock-auth-token-123456',
+        token,
         patient: patientResponse.patient,
       };
     } else {
@@ -173,9 +174,6 @@ export async function verifyPatientCode(
   }
 }
 
-/**
- * Helper function to look up a patient by email
- */
 async function lookupPatientByEmail(email: string): Promise<{
   success: boolean;
   patient?: {
@@ -310,11 +308,6 @@ async function lookupPatientByEmail(email: string): Promise<{
   }
 }
 
-/**
- * Fetch appointments for a patient
- * @param patientId The ID of the patient to fetch appointments for
- * @returns An array of appointment objects
- */
 export async function fetchPatientAppointments(patientId: string) {
   // This is a mock implementation - in a real app, you would fetch from an API
   console.log(`Fetching appointments for patient: ${patientId}`);
