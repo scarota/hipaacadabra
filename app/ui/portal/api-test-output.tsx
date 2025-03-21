@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/app/ui/button';
 import { testApiEndpoint } from '@/app/lib/portal-data';
-import type { ApiTestResult } from '@/app/lib/portal-data';
+import type { ApiTestResult } from '@/app/lib/portal-types';
 import type { FieldDefinition } from '@/app/lib/field-mapping-constants';
 
 interface ApiTestOutputProps {

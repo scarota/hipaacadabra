@@ -2,28 +2,11 @@
 
 import ApiKeyConfig from '@/app/ui/portal/api-key-config';
 import DataMapping from '@/app/ui/portal/data-mapping';
-import type { FieldDefinition } from '@/app/lib/field-mapping-constants';
+import type { ApiConfig, FieldMapping } from '@/app/lib/portal-types';
 
 interface SchemaFormProps {
-  initialApiConfig?: {
-    id: string;
-    org_code: string;
-    api_key: string;
-    base_url: string;
-    auth_type: string;
-    created_at: Date;
-    updated_at: Date;
-  } | null;
-  initialFieldMapping?: {
-    id: string;
-    org_code: string;
-    mapping_type: string;
-    endpoint: string;
-    mappings: Record<string, string>;
-    created_at: Date;
-    updated_at: Date;
-    fieldDefinitions?: FieldDefinition[];
-  } | null;
+  initialApiConfig?: ApiConfig | null;
+  initialFieldMapping?: FieldMapping | null;
 }
 
 export default function SchemaForm({

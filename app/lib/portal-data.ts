@@ -7,17 +7,9 @@ import { decrypt } from '@/app/lib/encryption';
 import { DATA_MAPPINGS } from '@/app/lib/field-mapping-constants';
 import { z } from 'zod';
 import { createAuthHeaders } from '@/app/lib/utils';
+import type { ApiConfig, ApiTestResult } from '@/app/lib/portal-types';
 
-export type ApiTestResult = {
-  success: boolean;
-  data?: any;
-  error?: string;
-  status?: number;
-  duration?: number;
-  recordCount?: number;
-};
-
-export async function getPortalApiConfig() {
+export async function getPortalApiConfig(): Promise<ApiConfig | null> {
   noStore();
   const prisma = new PrismaClient();
   const org = await getUserOrganization();

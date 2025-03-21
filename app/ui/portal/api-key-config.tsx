@@ -4,18 +4,10 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/app/ui/button';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { updatePortalApiConfig } from '@/app/lib/portal-actions';
-import type { State } from '@/app/lib/portal-actions';
+import type { ApiConfig, ApiConfigState } from '@/app/lib/portal-types';
 
 interface ApiKeyConfigProps {
-  initialConfig?: {
-    id: string;
-    org_code: string;
-    api_key: string;
-    base_url: string;
-    auth_type: string;
-    created_at: Date;
-    updated_at: Date;
-  } | null;
+  initialConfig?: ApiConfig | null;
 }
 
 export default function ApiKeyConfig({ initialConfig }: ApiKeyConfigProps) {
@@ -27,7 +19,7 @@ export default function ApiKeyConfig({ initialConfig }: ApiKeyConfigProps) {
 
   // Form submission state
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formState, setFormState] = useState<State>({
+  const [formState, setFormState] = useState<ApiConfigState>({
     message: null,
     errors: {},
   });

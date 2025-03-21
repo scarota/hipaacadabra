@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useActionState } from 'react';
 import { Button } from '@/app/ui/button';
 import { updateFieldMapping } from '@/app/lib/portal-actions';
-import type { FieldMappingState } from '@/app/lib/portal-actions';
+import type { FieldMapping, FieldMappingState } from '@/app/lib/portal-types';
 import {
   PATIENT_MAPPING,
   DATA_MAPPINGS,
@@ -13,16 +13,7 @@ import type { FieldDefinition } from '@/app/lib/field-mapping-constants';
 import ApiTestOutput from '@/app/ui/portal/api-test-output';
 
 interface DataMappingProps {
-  initialMapping?: {
-    id: string;
-    org_code: string;
-    mapping_type: string;
-    endpoint: string;
-    mappings: Record<string, string>;
-    created_at: Date;
-    updated_at: Date;
-    fieldDefinitions?: FieldDefinition[];
-  } | null;
+  initialMapping?: FieldMapping | null;
 }
 
 export default function DataMapping({ initialMapping }: DataMappingProps) {

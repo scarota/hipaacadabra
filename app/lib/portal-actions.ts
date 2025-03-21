@@ -6,16 +6,7 @@ import { PrismaClient } from '@prisma/client';
 import { getUserOrganization } from '@/app/lib/kinde-data';
 import { encrypt, decrypt } from '@/app/lib/encryption';
 import { DATA_MAPPINGS } from '@/app/lib/field-mapping-constants';
-import { createAuthHeaders } from '@/app/lib/utils';
-
-export type State = {
-  message: string | null;
-  errors?: {
-    apiKey?: string[];
-    baseUrl?: string[];
-    authType?: string[];
-  };
-};
+import type { ApiConfigState, FieldMappingState } from '@/app/lib/portal-types';
 
 const ApiConfigSchema = z.object({
   apiKey: z.string().min(1, 'API Key is required'),
@@ -24,9 +15,9 @@ const ApiConfigSchema = z.object({
 });
 
 export async function updatePortalApiConfig(
-  prevState: State,
+  prevState: ApiConfigState,
   formData: FormData,
-): Promise<State> {
+): Promise<ApiConfigState> {
   const validatedFields = ApiConfigSchema.safeParse({
     apiKey: formData.get('apiKey'),
     baseUrl: formData.get('baseUrl'),
@@ -91,15 +82,6 @@ export async function updatePortalApiConfig(
     await prisma.$disconnect();
   }
 }
-
-export type FieldMappingState = {
-  message: string | null;
-  errors?: {
-    endpoint?: string[];
-    mappings?: string[];
-    mappingType?: string[];
-  };
-};
 
 const FieldMappingSchema = z
   .object({
