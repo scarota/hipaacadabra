@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { PrismaClient } from '@prisma/client';
 import { getUserOrganization } from '@/app/lib/kinde-data';
-import { encrypt, decrypt } from '@/app/lib/encryption';
+import { encrypt } from '@/app/lib/encryption';
 import { DATA_MAPPINGS } from '@/app/lib/field-mapping-constants';
 import type { ApiConfigState, FieldMappingState } from '@/app/lib/portal-types';
 

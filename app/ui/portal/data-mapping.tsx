@@ -9,7 +9,6 @@ import {
   PATIENT_MAPPING,
   DATA_MAPPINGS,
 } from '@/app/lib/field-mapping-constants';
-import type { FieldDefinition } from '@/app/lib/field-mapping-constants';
 import ApiTestOutput from '@/app/ui/portal/api-test-output';
 
 interface DataMappingProps {
