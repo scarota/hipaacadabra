@@ -2,16 +2,10 @@
 
 import { Button } from '@/app/ui/button';
 
-interface BrandingFormProps {
-  organization: {
-    orgCode: string;
-    orgName: string;
-  };
-}
-
-export default function BrandingForm({ organization }: BrandingFormProps) {
+export default function BrandingForm() {
   return (
     <div className="max-w-2xl rounded-lg bg-white p-6 shadow">
+      <h2 className="mb-4 text-xl font-semibold">Branding</h2>
       <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
         <div className="grid grid-cols-1 gap-6">
           {/* Primary Color */}

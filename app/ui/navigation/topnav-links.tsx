@@ -1,31 +1,15 @@
 'use client';
 
-import {
-  UserGroupIcon,
-  HomeIcon,
-  DocumentDuplicateIcon,
-  WindowIcon,
-} from '@heroicons/react/24/outline';
+import { HomeIcon, WindowIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
 
-interface TopNavLinksProps {
-  isOwner: boolean;
-}
-
-export default function TopNavLinks({ isOwner }: TopNavLinksProps) {
+export default function TopNavLinks() {
   const pathname = usePathname();
 
   const links = [
     { name: 'Home', href: '/dashboard', icon: HomeIcon },
-
-    {
-      name: 'Invoices',
-      href: '/invoices',
-      icon: DocumentDuplicateIcon,
-    },
-    { name: 'Customers', href: '/customers', icon: UserGroupIcon },
     { name: 'Portal', href: '/portal', icon: WindowIcon },
   ];
 

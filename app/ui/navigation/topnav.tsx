@@ -31,7 +31,7 @@ export default async function TopNav() {
           </div>
           {hasOrg && (
             <div className="flex items-center space-x-4">
-              <TopNavLinks isOwner={isOwner} />
+              <TopNavLinks />
             </div>
           )}
         </div>

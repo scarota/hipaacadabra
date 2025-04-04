@@ -20,7 +20,6 @@ export default function GeneralForm({
   const initialState: State = { message: null, errors: {} };
   const [state, dispatch] = useActionState(updateOrganization, initialState);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>(logo);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,7 +37,6 @@ export default function GeneralForm({
         return;
       }
 
-      setSelectedFile(file);
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
     }
